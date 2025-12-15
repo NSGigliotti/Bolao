@@ -9,10 +9,12 @@ namespace Bolao.Repository;
 public class UserRepository : IUserRepository
 {
     private readonly BolaoDbContext _BolaoDbContext ;
+    private readonly JwtService _jwtService;
 
-    UserRepository(BolaoDbContext bolaoDbContext)
+    public UserRepository(BolaoDbContext bolaoDbContext, JwtService jwtService)
     {
         _BolaoDbContext = bolaoDbContext;
+        _jwtService = jwtService;
     }
     public void ChangePassword(string password, Guid id)
     {
@@ -41,14 +43,17 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public Task<UserModel> CreateUser(UserModel user)
+    public async Task<UserModel> CreateUser(UserModel user)
     {
-        throw new NotImplementedException();
+        _BolaoDbContext.Users.Add(user);
+        await _BolaoDbContext.SaveChangesAsync();
+        return user;
     }
 
-    public Task<string> CreatToken(UserModel user)
+    public string CreatToken(UserModel user)
     {
-        throw new NotImplementedException();
+        string token = _jwtService.GenerateToken(user);
+        return token ;
     }
 
     public Task<UserModel> DecriptToken(string token)

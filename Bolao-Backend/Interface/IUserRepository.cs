@@ -6,7 +6,7 @@ public interface IUserRepository
     Task<UserModel> CreateUser(UserModel user);
     bool CheckEmailValid(string email);
     Task<bool> CheckEmailExist(string email);
-    Task<string> CreatToken(UserModel user);
+    string CreatToken(UserModel user);
     Task<UserModel> DecriptToken(string token);
     void ChangePassword(string password, Guid id);
 }
