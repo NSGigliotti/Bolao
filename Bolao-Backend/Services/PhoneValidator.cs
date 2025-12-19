@@ -23,8 +23,6 @@ public class PhoneNumberValidator
 
             bool isValid = phoneUtil.IsValidNumber(number);
 
-            Console.WriteLine(phoneNumber + " : " + defaultRegionCode + " isValid: " + isValid );
-
             return isValid;
         }
         catch (NumberParseException e)

@@ -1,6 +1,14 @@
 using Bolao.Data;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+using Bolao.Interfaces;
+using Bolao.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,6 +19,54 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+var jwtSecret = builder.Configuration["JWT_SECRET_KEY"];
+var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? "DefaultIssuer";
+var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? "DefaultAudience";
+
+var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options => 
+{
+
+    options.Events = new JwtBearerEvents
+{
+    OnForbidden = context =>
+    {
+        context.Response.StatusCode = 403;
+        context.Response.ContentType = "application/json";
+        return context.Response.WriteAsync("{\"error\": \"Acesso negado: Você não tem permissão de Administrador.\"}");
+    }
+};
+
+    options.RequireHttpsMetadata = false; //! definir como true em produção
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+
+        //RoleClaimType = "role"
+    };
+});
+
 
 builder.Services.AddDbContext<BolaoDbContext>(options =>
 {
@@ -56,9 +112,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication(); 
+app.UseAuthorization();  
 
 app.MapControllers();
 

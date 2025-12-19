@@ -7,13 +7,17 @@ public class UserModel
     public string Email {get; set;}
     public string Password {get; set;}
     public string Phone {get; set;}
-    public int Score {get; set;}
+    public int Score {get; set;} = 0;
+    public bool IsAdmin {get; set;} 
+    public bool GameMake {get; set;} = false;
+
+    public PaymentStatus Status {get; set;} = PaymentStatus.Pending;
 
     public UserModel()
     {
     }
 
-    public UserModel(string name, string email, string password,  string phone)
+    public UserModel(string name, string email, string password,  string phone, bool isAdmin)
     {
        Id = Guid.NewGuid();
        Name = name;
@@ -21,5 +25,6 @@ public class UserModel
        Password = password;
        Phone = phone;
        Score = 0; 
+       IsAdmin = isAdmin;
     }
 }

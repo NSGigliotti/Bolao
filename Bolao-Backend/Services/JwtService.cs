@@ -23,17 +23,19 @@ public class JwtService
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSecret); 
 
+        Console.WriteLine("ISADMIN : " + user.IsAdmin);
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(2), 
             Issuer = _jwtIssuer,
             Audience = _jwtAudience,
             SigningCredentials = new SigningCredentials(
@@ -45,4 +47,7 @@ public class JwtService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+
+    
+    
 }

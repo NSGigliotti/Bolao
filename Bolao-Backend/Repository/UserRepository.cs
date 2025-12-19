@@ -60,4 +60,24 @@ public class UserRepository : IUserRepository
     {
         throw new NotImplementedException();
     }
+
+    public async Task<UserModel> GetUserFromEmail(string email)
+    {
+        UserModel user = await _BolaoDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return user;
+    }
+
+    public async Task<UserModel> GetUserFromID(Guid id)
+    {
+        UserModel user = await _BolaoDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        return user;
+    }
+
+    public async Task<UserModel> SaveStance(UserModel user)
+    {
+        var userExistente = await _BolaoDbContext.Users.FindAsync(user.Id);
+        _BolaoDbContext.Entry(userExistente).CurrentValues.SetValues(user);
+        await _BolaoDbContext.SaveChangesAsync();
+        return userExistente;
+    }
 }
