@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.Mvc;
 public class AdminController : ControllerBase
 {
 
-    private readonly IUserRepository _userRepository;
+    private readonly IAdminService _adminService;
 
-    public AdminController(IUserRepository userRepository)
+    public AdminController(IAdminService adminService)
     {
-        _userRepository = userRepository;
+        _adminService = adminService;
     }
 
 
@@ -24,25 +24,14 @@ public class AdminController : ControllerBase
     [HttpPost("PaymentUpdate")]
     public async Task<IActionResult> PlaymentUpdate([FromBody] PaymentUpdateDTOs payment)
     {
-
-        if(payment.Id.ToString() == "" || payment.Id == null) return BadRequest("Id necessário");
-
-        if(payment.CodeENUMPayment == null) return BadRequest("codigo invalido");
-
-        UserModel user = await _userRepository.GetUserFromID(payment.Id);
-
-        if (user == null) return NotFound("Usuário não encontrado");
-
-        if(payment.CodeENUMPayment == PaymentStatus.Paid)
+        try
         {
-            user.Status = PaymentStatus.Paid;
-        } else if(payment.CodeENUMPayment == PaymentStatus.Cancelled)
+            string status = await _adminService.PlaymentUpdate(payment);
+            return Ok(status);
+        }
+        catch (Exception ex)
         {
-            user.Status = PaymentStatus.Cancelled;
-        } else return BadRequest("Não foi possível processar a atualização: o status do pagamento fornecido é inválido ou não permitido para esta operação.");
-
-        await _userRepository.SaveStance(user);
-
-        return Ok(user);
+            return BadRequest(ex.Message);
+        }
     }
 }
