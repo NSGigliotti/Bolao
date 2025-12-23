@@ -30,6 +30,8 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IMachesService, MachesService>();
+builder.Services.AddScoped<IMachesRepository, MachesRepository>();
 
 builder.Services.AddAuthentication(options =>
 {

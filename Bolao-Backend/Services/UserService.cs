@@ -23,6 +23,8 @@ public class UserService : IUserService
         string passwordHash = passwordHasher.HashPassword(null, createUser.Password);
         string phoneClear = PhoneNumberValidator.ClearPhone(createUser.Phone);
 
+        //if(!PhoneNumberValidator.IsValidPhoneNumber(createUser.Phone)) throw new Exception("Numero Invalido");
+
         string rawEmails = Environment.GetEnvironmentVariable("ADMIN_EMAILS") ?? string.Empty;
         bool isAdmin = rawEmails.Split(',').Select(e => e.Trim()).Contains(createUser.Email, StringComparer.OrdinalIgnoreCase);
 
