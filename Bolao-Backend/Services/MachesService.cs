@@ -9,6 +9,22 @@ public class MachesService : IMachesService
     {
         _machesRepository = machesRepository;
     }
+
+    public async Task<List<MatchDto>> GetAllMatch()
+    {
+        var allMatch = await _machesRepository.GetAllMatch();
+
+        Console.WriteLine(allMatch[0].Id);
+
+        var groupedMatches = allMatch.GroupBy(m => m.Stage).OrderBy(g => g.Key).Select(g => new MatchDto
+        {
+            StageName = (char)g.Key,
+            Matchs = g.OrderBy(m => m.MatchDate).ThenBy(m => m.Id).ToList()
+        }).ToList();
+
+        return groupedMatches;
+    }
+
     public async Task<List<GroupDto>> GetGroupsAsync()
     {
         List<TeamModel> teams = await _machesRepository.GetGroupsAsync();

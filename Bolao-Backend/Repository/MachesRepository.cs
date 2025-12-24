@@ -11,6 +11,13 @@ public class MachesRepository : IMachesRepository
     {
         _BolaoDbContext = bolaoDbContext;
     }
+
+    public async Task<List<MatchModel>> GetAllMatch()
+    {
+        var allMatch = await _BolaoDbContext.Matches.ToListAsync();
+        return allMatch;
+    }
+
     public async Task<List<TeamModel>> GetGroupsAsync()
     {
         var allTeams = await _BolaoDbContext.Teams.ToListAsync();

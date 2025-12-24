@@ -5,7 +5,7 @@ namespace Bolao.Data;
 
 public class BolaoDbContext : DbContext
 {
-    public BolaoDbContext (DbContextOptions<BolaoDbContext> options) : base(options)
+    public BolaoDbContext(DbContextOptions<BolaoDbContext> options) : base(options)
     {
     }
 
@@ -16,11 +16,19 @@ public class BolaoDbContext : DbContext
         modelBuilder.Entity<UserModel>(entity =>
         {
             entity.Property(e => e.IsAdmin)
-                  .HasColumnName("IsAdmin") 
+                  .HasColumnName("IsAdmin")
                   .IsRequired();
         });
+
+        modelBuilder.Entity<MatchModel>(entity =>
+    {
+        entity.Property(e => e.HomeTeamId).HasColumnType("char(36)");
+        entity.Property(e => e.AwayTeamId).HasColumnType("char(36)");
+        entity.Property(e => e.WinnerId).HasColumnType("char(36)");
+    });
     }
 
-    public DbSet<UserModel> Users {get; set;}
-    public DbSet<TeamModel> Teams {get; set;}
+    public DbSet<UserModel> Users { get; set; }
+    public DbSet<TeamModel> Teams { get; set; }
+    public DbSet<MatchModel> Matches { get; set; }
 }

@@ -22,6 +22,53 @@ namespace Bolao_Backend.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Bolao.Models.MatchModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AwayTeamId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("AwayTeamId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AwayTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("HomeTeamId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("HomeTeamId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HomeTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("MatchDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Stage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AwayTeamId1");
+
+                    b.HasIndex("HomeTeamId1");
+
+                    b.ToTable("Matches");
+                });
+
             modelBuilder.Entity("Bolao.Models.TeamModel", b =>
                 {
                     b.Property<int>("Id")
@@ -109,6 +156,25 @@ namespace Bolao_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Bolao.Models.MatchModel", b =>
+                {
+                    b.HasOne("Bolao.Models.TeamModel", "AwayTeam")
+                        .WithMany()
+                        .HasForeignKey("AwayTeamId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bolao.Models.TeamModel", "HomeTeam")
+                        .WithMany()
+                        .HasForeignKey("HomeTeamId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AwayTeam");
+
+                    b.Navigation("HomeTeam");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,8 +11,15 @@ public class MachesController : ControllerBase
         _machesService = machesService;
     }
 
-    [HttpGet("GetAllMachesGups")]
-    public async Task<IActionResult> GetAllMachesGups()
+    [HttpGet("GetAllMaches")]
+    public async Task<IActionResult> GetAllMaches()
+    {
+        var allMatch = await _machesService.GetAllMatch();
+        return Ok(allMatch);
+    }
+
+    [HttpGet("GetMachesGups")]
+    public async Task<IActionResult> GetMachesGups()
     {
         var allTimes = await _machesService.GetGroupsAsync();
         return Ok(allTimes);
