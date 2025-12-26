@@ -89,8 +89,39 @@ using (var scope = app.Services.CreateScope())
     var logger = services.GetRequiredService<ILogger<Program>>();
     var db = services.GetRequiredService<BolaoDbContext>();
     
+    // Wait for DB to be ready
+    var dbReady = false;
+    var dbRetries = 20;
+    while (!dbReady && dbRetries > 0)
+    {
+        try
+        {
+            using (var client = new System.Net.Sockets.TcpClient())
+            {
+                var result = client.BeginConnect("db", 3306, null, null);
+                var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
+                if (success)
+                {
+                    client.EndConnect(result);
+                    dbReady = true;
+                    logger.LogInformation("Successfully connected to database server.");
+                }
+                else
+                {
+                    throw new Exception("Timed out");
+                }
+            }
+        }
+        catch
+        {
+            dbRetries--;
+            logger.LogWarning("Waiting for database server to be ready ({Retries} attempts left)...", dbRetries);
+            Thread.Sleep(2000);
+        }
+    }
+
     var retries = 10;
-    while (retries > 0)
+    while (retries > 0 && dbReady)
     {
         try
         {
@@ -102,9 +133,16 @@ using (var scope = app.Services.CreateScope())
         catch (Exception ex)
         {
             retries--;
-            logger.LogError(ex, "Migration failed. Retries remaining: {Retries}", retries);
-            if (retries == 0) throw;
-            Thread.Sleep(3000);
+            if (retries > 0)
+            {
+                logger.LogWarning("Migration failed: {Message}. Waiting 3s before retry. Retries remaining: {Retries}", ex.Message, retries);
+                Thread.Sleep(3000);
+            }
+            else
+            {
+                logger.LogError(ex, "Migration failed permanently.");
+                throw;
+            }
         }
     }
 }

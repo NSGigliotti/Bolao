@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bolao_Backend.Migrations
 {
     [DbContext(typeof(BolaoDbContext))]
-    [Migration("20251224132947_InitialCreate")]
+    [Migration("20251226150355_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,19 +33,13 @@ namespace Bolao_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("AwayTeamId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("AwayTeamId1")
+                    b.Property<int>("AwayTeamId")
                         .HasColumnType("int");
 
                     b.Property<int?>("AwayTeamScore")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("HomeTeamId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("HomeTeamId1")
+                    b.Property<int>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int?>("HomeTeamScore")
@@ -54,20 +48,25 @@ namespace Bolao_Backend.Migrations
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int?>("Round")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stage")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("WinnerId")
-                        .HasColumnType("char(36)");
+                    b.Property<int?>("WinnerId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AwayTeamId1");
+                    b.HasIndex("AwayTeamId");
 
-                    b.HasIndex("HomeTeamId1");
+                    b.HasIndex("HomeTeamId");
+
+                    b.HasIndex("WinnerId");
 
                     b.ToTable("Matches");
                 });
@@ -165,19 +164,25 @@ namespace Bolao_Backend.Migrations
                 {
                     b.HasOne("Bolao.Models.TeamModel", "AwayTeam")
                         .WithMany()
-                        .HasForeignKey("AwayTeamId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("AwayTeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Bolao.Models.TeamModel", "HomeTeam")
                         .WithMany()
-                        .HasForeignKey("HomeTeamId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("HomeTeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Bolao.Models.TeamModel", "Winner")
+                        .WithMany()
+                        .HasForeignKey("WinnerId");
 
                     b.Navigation("AwayTeam");
 
                     b.Navigation("HomeTeam");
+
+                    b.Navigation("Winner");
                 });
 #pragma warning restore 612, 618
         }

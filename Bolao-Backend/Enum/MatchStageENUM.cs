@@ -2,7 +2,9 @@ namespace Bolao.Enum;
 
 public enum MatchStage
 {
-   GroupStage,
+   GroupStageRound1,
+    GroupStageRound2,
+    GroupStageRound3,
     RoundOf32, 
     RoundOf16,
     QuarterFinals,

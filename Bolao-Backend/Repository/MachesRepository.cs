@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 public class MachesRepository : IMachesRepository
 {
-    private readonly BolaoDbContext _BolaoDbContext ;
+    private readonly BolaoDbContext _BolaoDbContext;
 
-    public MachesRepository(BolaoDbContext bolaoDbContext )
+    public MachesRepository(BolaoDbContext bolaoDbContext)
     {
         _BolaoDbContext = bolaoDbContext;
     }
 
     public async Task<List<MatchModel>> GetAllMatch()
     {
-        var allMatch = await _BolaoDbContext.Matches.ToListAsync();
+        var allMatch = await _BolaoDbContext.Matches.Include(m => m.HomeTeam).Include(m => m.AwayTeam).ToListAsync(); ;
         return allMatch;
     }
 

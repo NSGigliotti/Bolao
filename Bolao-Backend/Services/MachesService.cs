@@ -1,26 +1,43 @@
 
+using Bolao.Enum;
 using Bolao.Models;
 
 public class MachesService : IMachesService
 {
     private readonly IMachesRepository _machesRepository;
 
+    private string GetStageName(MatchStage stage) => stage switch
+    {
+        MatchStage.GroupStageRound1 => "1ª Rodada (Fase de Grupos)",
+        MatchStage.GroupStageRound2 => "2ª Rodada (Fase de Grupos)",
+        MatchStage.GroupStageRound3 => "3ª Rodada (Fase de Grupos)",
+        MatchStage.RoundOf32 => "32-avos de Final",
+        MatchStage.RoundOf16 => "Oitavas de Final",
+        MatchStage.QuarterFinals => "Quartas de Final",
+        MatchStage.SemiFinals => "Semifinais",
+        MatchStage.ThirdPlace => "Terceiro Lugar",
+        MatchStage.Final => "Final",
+        _ => "Outros"
+    };
+
     public MachesService(IMachesRepository machesRepository)
     {
         _machesRepository = machesRepository;
     }
 
+
+
     public async Task<List<MatchDto>> GetAllMatch()
     {
         var allMatch = await _machesRepository.GetAllMatch();
 
-        Console.WriteLine(allMatch[0].Id);
 
-        var groupedMatches = allMatch.GroupBy(m => m.Stage).OrderBy(g => g.Key).Select(g => new MatchDto
+        var groupedMatches = allMatch.OrderBy(m => m.MatchDate).GroupBy(m => m.Stage).Select(g => new MatchDto
         {
-            StageName = (char)g.Key,
-            Matchs = g.OrderBy(m => m.MatchDate).ThenBy(m => m.Id).ToList()
+            StageName = GetStageName(g.Key),
+            Matchs = g.ToList()
         }).ToList();
+
 
         return groupedMatches;
     }

@@ -75,42 +75,51 @@ namespace Bolao_Backend.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     MatchDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Stage = table.Column<int>(type: "int", nullable: false),
+                    Round = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    HomeTeamId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    HomeTeamId1 = table.Column<int>(type: "int", nullable: false),
+                    HomeTeamId = table.Column<int>(type: "int", nullable: false),
                     HomeTeamScore = table.Column<int>(type: "int", nullable: true),
-                    AwayTeamId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AwayTeamId1 = table.Column<int>(type: "int", nullable: false),
+                    AwayTeamId = table.Column<int>(type: "int", nullable: false),
                     AwayTeamScore = table.Column<int>(type: "int", nullable: true),
-                    WinnerId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    WinnerId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Matches", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Matches_Teams_AwayTeamId1",
-                        column: x => x.AwayTeamId1,
+                        name: "FK_Matches_Teams_AwayTeamId",
+                        column: x => x.AwayTeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Matches_Teams_HomeTeamId1",
-                        column: x => x.HomeTeamId1,
+                        name: "FK_Matches_Teams_HomeTeamId",
+                        column: x => x.HomeTeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Matches_Teams_WinnerId",
+                        column: x => x.WinnerId,
+                        principalTable: "Teams",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_AwayTeamId1",
+                name: "IX_Matches_AwayTeamId",
                 table: "Matches",
-                column: "AwayTeamId1");
+                column: "AwayTeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_HomeTeamId1",
+                name: "IX_Matches_HomeTeamId",
                 table: "Matches",
-                column: "HomeTeamId1");
+                column: "HomeTeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Matches_WinnerId",
+                table: "Matches",
+                column: "WinnerId");
         }
 
         /// <inheritdoc />

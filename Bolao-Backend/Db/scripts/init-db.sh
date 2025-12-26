@@ -60,29 +60,17 @@ echo "✅ Tabela Teams encontrada!"
 ROW_COUNT=$(mysql -h"db" -u"${MYSQL_USER}" "${MYSQL_DATABASE}" -sse "SELECT COUNT(*) FROM Teams;")
 
 if [ "$ROW_COUNT" -eq "0" ]; then
-  echo "🚀 Preparando SQL para IDs Inteiros e colunas EF Core..."
-  
-  # O segredo está nestes comandos sed:
-  # 1. Remove 'Id,' da lista de colunas do INSERT
-  # 2. Remove 'UUID(),' da lista de valores
-  # 3. Ajusta as colunas HomeTeamId/AwayTeamId para o padrão do EF Core
-  sed -e 's/(Id, /( /g' \
-      -e 's/UUID(), //g' \
-      -e 's/HomeTeamId/HomeTeamId1/g' \
-      -e 's/AwayTeamId/AwayTeamId1/g' \
-      /scripts/init-teams.sql > /tmp/init-final.sql
-
   echo "Executando importação..."
   # Usamos SET sql_mode='' para garantir que campos extras obrigatórios não barrem o insert
   {
     echo "SET FOREIGN_KEY_CHECKS = 0;"
     echo "SET sql_mode = '';"
-    cat /tmp/init-final.sql
+    cat /scripts/init-teams.sql
     echo "SET FOREIGN_KEY_CHECKS = 1;"
   } | mysql -h"db" -u"${MYSQL_USER}" "${MYSQL_DATABASE}"
   
   echo "✅ Importação concluída com sucesso!"
-  rm /tmp/init-final.sql
+
 else
   echo "ℹ️  Dados já existentes. Pulando."
 fi

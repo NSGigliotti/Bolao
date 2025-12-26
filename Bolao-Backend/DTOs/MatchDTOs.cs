@@ -2,6 +2,6 @@ using Bolao.Models;
 
 public class MatchDto
 {
-    public char StageName { get; set; }
-    public List<MatchModel> Matchs { get; set; }
+    public string StageName { get; set; }
+    public required List<MatchModel> Matchs { get; set; }
 }
