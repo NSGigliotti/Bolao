@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bolao_Backend.Migrations
 {
     [DbContext(typeof(BolaoDbContext))]
-    [Migration("20251226150355_InitialCreate")]
+    [Migration("20251231134204_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -69,6 +69,36 @@ namespace Bolao_Backend.Migrations
                     b.HasIndex("WinnerId");
 
                     b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("Bolao.Models.PredictionModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("AwayTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("Prediction");
                 });
 
             modelBuilder.Entity("Bolao.Models.TeamModel", b =>
@@ -183,6 +213,25 @@ namespace Bolao_Backend.Migrations
                     b.Navigation("HomeTeam");
 
                     b.Navigation("Winner");
+                });
+
+            modelBuilder.Entity("Bolao.Models.PredictionModel", b =>
+                {
+                    b.HasOne("Bolao.Models.MatchModel", "Match")
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bolao.Models.UserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

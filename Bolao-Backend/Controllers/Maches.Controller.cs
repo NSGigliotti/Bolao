@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Bolao.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -24,5 +27,33 @@ public class MachesController : ControllerBase
         var allTimes = await _machesService.GetGroupsAsync();
         return Ok(allTimes);
     }
-    
+
+    [Authorize]
+    [HttpPost("CreatePrediction")]
+    public async Task<IActionResult> CreatePrediction([FromBody] List<MakePredictionDTOs> makePredictionDTOs)
+    {
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        Console.WriteLine(userId);
+
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid id)) return Unauthorized("Usuário não identificado ou formato de ID inválido.");
+
+        //Guid id = Guid.Parse(userId);
+
+        try
+        {
+            await _machesService.CreatePrediction(makePredictionDTOs, id);
+
+            return Ok(new { Id = userId });
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+
+
+    }
 }
+

@@ -12,4 +12,5 @@ public interface IUserRepository
     Task<UserModel> DecriptToken(string token);
     Task<UserModel> SaveStance(UserModel user);
     void ChangePassword(string password, Guid id);
+    Task<UserModel> UpdateUser(UserModel user);
 }

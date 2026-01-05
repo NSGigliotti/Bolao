@@ -1,10 +1,14 @@
 
+using Bolao.DTOs;
 using Bolao.Enum;
+using Bolao.Interfaces;
 using Bolao.Models;
 
 public class MachesService : IMachesService
 {
     private readonly IMachesRepository _machesRepository;
+    private readonly IUserRepository _userRepository;
+
 
     private string GetStageName(MatchStage stage) => stage switch
     {
@@ -20,9 +24,10 @@ public class MachesService : IMachesService
         _ => "Outros"
     };
 
-    public MachesService(IMachesRepository machesRepository)
+    public MachesService(IMachesRepository machesRepository, IUserRepository userRepository)
     {
         _machesRepository = machesRepository;
+        _userRepository = userRepository;
     }
 
 
@@ -55,5 +60,39 @@ public class MachesService : IMachesService
         }).ToList();
 
         return groupedTeams;
+    }
+
+    public async Task<string> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id)
+    {
+        if (makePredictionDTOs == null) throw new Exception("Lista do bolao invalida");
+
+        if (makePredictionDTOs.Count != 104) throw new Exception();
+
+        if(await _machesRepository.UserHasPredictions(id)) throw new Exception("Usuario com o bolao ja criado");
+
+        List<PredictionModel> userBolao = [];
+
+        foreach (var i in makePredictionDTOs)
+        {
+            if (i.MatchId == null) throw new Exception("Id da partida invalido");
+
+            if (i.HomeTeamScore == null || i.AwayTeamScore == null) throw new Exception("");
+
+            PredictionModel prediction = new PredictionModel(
+                 userId: id,
+                 matchId: i.MatchId,
+                 homeTeamScore: i.HomeTeamScore,
+                 awayTeamScore: i.AwayTeamScore
+            );
+            userBolao.Add(prediction);
+        }
+
+        await _machesRepository.CreatePrediction(userBolao);
+        UserModel user = await _userRepository.GetUserFromID(id);
+        user.GameMake = true;
+        await _userRepository.UpdateUser(user);
+
+
+        throw new NotImplementedException();
     }
 }

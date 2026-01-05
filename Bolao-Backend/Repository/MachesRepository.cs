@@ -5,22 +5,42 @@ using Microsoft.EntityFrameworkCore;
 
 public class MachesRepository : IMachesRepository
 {
-    private readonly BolaoDbContext _BolaoDbContext;
+    private readonly BolaoDbContext _bolaoDbContext;
 
     public MachesRepository(BolaoDbContext bolaoDbContext)
     {
-        _BolaoDbContext = bolaoDbContext;
+        _bolaoDbContext = bolaoDbContext;
+    }
+
+    public async Task<string> CreatePrediction(List<PredictionModel> predictions)
+    {
+       _bolaoDbContext.Prediction.AddRangeAsync(predictions);
+       await _bolaoDbContext.SaveChangesAsync();
+       return "ok";
     }
 
     public async Task<List<MatchModel>> GetAllMatch()
     {
-        var allMatch = await _BolaoDbContext.Matches.Include(m => m.HomeTeam).Include(m => m.AwayTeam).ToListAsync(); ;
+        var allMatch = await _bolaoDbContext.Matches.Include(m => m.HomeTeam).Include(m => m.AwayTeam).ToListAsync(); ;
         return allMatch;
+    }
+
+    public async Task<List<PredictionModel>> GetAllPedicitonById(Guid id)
+    {
+        var predictions = await _bolaoDbContext.Prediction.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
+
+    return predictions;
+       
     }
 
     public async Task<List<TeamModel>> GetGroupsAsync()
     {
-        var allTeams = await _BolaoDbContext.Teams.ToListAsync();
+        var allTeams = await _bolaoDbContext.Teams.ToListAsync();
         return allTeams;
+    }
+
+    public async Task<bool> UserHasPredictions(Guid userId)
+    {
+         return await _bolaoDbContext.Prediction.AnyAsync(p => p.UserId == userId);
     }
 }

@@ -106,6 +106,35 @@ namespace Bolao_Backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "Prediction",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    MatchId = table.Column<int>(type: "int", nullable: false),
+                    HomeTeamScore = table.Column<int>(type: "int", nullable: false),
+                    AwayTeamScore = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Prediction", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Prediction_Matches_MatchId",
+                        column: x => x.MatchId,
+                        principalTable: "Matches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Prediction_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Matches_AwayTeamId",
                 table: "Matches",
@@ -120,11 +149,24 @@ namespace Bolao_Backend.Migrations
                 name: "IX_Matches_WinnerId",
                 table: "Matches",
                 column: "WinnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Prediction_MatchId",
+                table: "Prediction",
+                column: "MatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Prediction_UserId1",
+                table: "Prediction",
+                column: "UserId1");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Prediction");
+
             migrationBuilder.DropTable(
                 name: "Matches");
 

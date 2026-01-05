@@ -5,4 +5,5 @@ public interface IMachesService
 {
    Task<List<GroupDto>> GetGroupsAsync();
    Task<List<MatchDto>> GetAllMatch();
+   Task<string> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id);
 }

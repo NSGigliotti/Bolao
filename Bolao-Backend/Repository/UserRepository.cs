@@ -8,7 +8,7 @@ namespace Bolao.Repository;
 
 public class UserRepository : IUserRepository
 {
-    private readonly BolaoDbContext _BolaoDbContext ;
+    private readonly BolaoDbContext _BolaoDbContext;
     private readonly JwtService _jwtService;
 
     public UserRepository(BolaoDbContext bolaoDbContext, JwtService jwtService)
@@ -30,12 +30,12 @@ public class UserRepository : IUserRepository
 
     public bool CheckEmailValid(string email)
     {
-            try
+        try
         {
 
             var addr = new MailAddress(email);
 
-            return addr.Address == email; 
+            return addr.Address == email;
         }
         catch (FormatException)
         {
@@ -53,7 +53,7 @@ public class UserRepository : IUserRepository
     public string CreatToken(UserModel user)
     {
         string token = _jwtService.GenerateToken(user);
-        return token ;
+        return token;
     }
 
     public Task<UserModel> DecriptToken(string token)
@@ -79,5 +79,21 @@ public class UserRepository : IUserRepository
         _BolaoDbContext.Entry(userExistente).CurrentValues.SetValues(user);
         await _BolaoDbContext.SaveChangesAsync();
         return userExistente;
+    }
+
+    public async Task<UserModel> UpdateUser(UserModel user)
+    {
+        var existingUser = await _BolaoDbContext.Users.FindAsync(user.Id);
+
+        if (existingUser != null)
+        {
+            _BolaoDbContext.Entry(existingUser).CurrentValues.SetValues(user);
+            await _BolaoDbContext.SaveChangesAsync();
+            return user;
+        }
+        else
+        {
+            throw new Exception("Usuário não encontrado para atualização.");
+        }
     }
 }

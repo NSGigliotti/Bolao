@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 
+
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,11 +75,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<BolaoDbContext>(options =>
 {
-    options.UseMySql(
+   options.UseMySql(
         connectionString,
         new MySqlServerVersion(new Version(8, 0, 36)), 
-        mysqlOptions => mysqlOptions.EnableRetryOnFailure()
+        mysqlOptions => 
+        {
+            mysqlOptions.EnableRetryOnFailure();
+        }
     );
+    
 });
 
 var app = builder.Build();
