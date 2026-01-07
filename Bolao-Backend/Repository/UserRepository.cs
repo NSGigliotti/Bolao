@@ -61,6 +61,12 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
+    public async Task<List<UserModel>> GetAllUsers()
+    {
+        List<UserModel> users = await _BolaoDbContext.Users.AsNoTracking().ToListAsync();
+        return users;
+    }
+
     public async Task<UserModel> GetUserFromEmail(string email)
     {
         UserModel user = await _BolaoDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -71,14 +77,6 @@ public class UserRepository : IUserRepository
     {
         UserModel user = await _BolaoDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
         return user;
-    }
-
-    public async Task<UserModel> SaveStance(UserModel user)
-    {
-        var userExistente = await _BolaoDbContext.Users.FindAsync(user.Id);
-        _BolaoDbContext.Entry(userExistente).CurrentValues.SetValues(user);
-        await _BolaoDbContext.SaveChangesAsync();
-        return userExistente;
     }
 
     public async Task<UserModel> UpdateUser(UserModel user)

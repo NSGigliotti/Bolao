@@ -4,7 +4,9 @@ public interface IMachesRepository
 {
    Task<List<TeamModel>> GetGroupsAsync();
    Task<List<MatchModel>> GetAllMatch();
+   Task<MatchModel> GetMatchAsync(int id);
    Task<string> CreatePrediction(List<PredictionModel> predictions);
    Task<List<PredictionModel>> GetAllPedicitonById (Guid id);
    Task<bool> UserHasPredictions(Guid userId);
+   Task<List<PredictionModel>> GetAllPedicitonByMachsId (int id);
 }

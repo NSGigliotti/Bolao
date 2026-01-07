@@ -14,9 +14,9 @@ public class MachesRepository : IMachesRepository
 
     public async Task<string> CreatePrediction(List<PredictionModel> predictions)
     {
-       _bolaoDbContext.Prediction.AddRangeAsync(predictions);
-       await _bolaoDbContext.SaveChangesAsync();
-       return "ok";
+        _bolaoDbContext.Prediction.AddRangeAsync(predictions);
+        await _bolaoDbContext.SaveChangesAsync();
+        return "ok";
     }
 
     public async Task<List<MatchModel>> GetAllMatch()
@@ -28,9 +28,13 @@ public class MachesRepository : IMachesRepository
     public async Task<List<PredictionModel>> GetAllPedicitonById(Guid id)
     {
         var predictions = await _bolaoDbContext.Prediction.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
+        return predictions;
+    }
 
-    return predictions;
-       
+    public async Task<List<PredictionModel>> GetAllPedicitonByMachsId(int id)
+    {
+        var Machs = await _bolaoDbContext.Prediction.AsNoTracking().Where(x => x.MatchId == id).ToListAsync();
+        return Machs;
     }
 
     public async Task<List<TeamModel>> GetGroupsAsync()
@@ -39,8 +43,14 @@ public class MachesRepository : IMachesRepository
         return allTeams;
     }
 
+    public async Task<MatchModel> GetMatchAsync(int id)
+    {
+        var match = await _bolaoDbContext.Matches.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return match;
+    }
+
     public async Task<bool> UserHasPredictions(Guid userId)
     {
-         return await _bolaoDbContext.Prediction.AnyAsync(p => p.UserId == userId);
+        return await _bolaoDbContext.Prediction.AnyAsync(p => p.UserId == userId);
     }
 }

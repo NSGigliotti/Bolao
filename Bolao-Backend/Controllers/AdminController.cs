@@ -30,8 +30,17 @@ public class AdminController : ControllerBase
             return Ok(status);
         }
         catch (Exception ex)
-        {
+        {   
             return BadRequest(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("ResultUpdate")]
+    public async Task<IActionResult> ResultUpdate([FromBody] ResultUpdateDTOs resultUpdateDTOs)
+    {
+        
+        return Ok("");
+    }
+
 }
