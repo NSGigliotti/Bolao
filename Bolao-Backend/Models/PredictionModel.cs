@@ -14,6 +14,7 @@ public class PredictionModel
 
     public int HomeTeamScore { get; set; }
     public int AwayTeamScore { get; set; }
+    public int PointsGained { get; set; }
 
     public PredictionModel(Guid userId) { }
 

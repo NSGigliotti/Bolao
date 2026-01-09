@@ -9,4 +9,6 @@ public interface IMachesRepository
    Task<List<PredictionModel>> GetAllPedicitonById (Guid id);
    Task<bool> UserHasPredictions(Guid userId);
    Task<List<PredictionModel>> GetAllPedicitonByMachsId (int id);
+   Task UpdateMatchAsync(MatchModel match);
+   Task UpdatePredictionAsync(PredictionModel prediction);
 }

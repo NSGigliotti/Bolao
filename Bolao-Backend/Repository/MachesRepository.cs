@@ -53,4 +53,15 @@ public class MachesRepository : IMachesRepository
     {
         return await _bolaoDbContext.Prediction.AnyAsync(p => p.UserId == userId);
     }
+    public async Task UpdateMatchAsync(MatchModel match)
+    {
+        _bolaoDbContext.Matches.Update(match);
+        await _bolaoDbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdatePredictionAsync(PredictionModel prediction)
+    {
+        _bolaoDbContext.Prediction.Update(prediction);
+        await _bolaoDbContext.SaveChangesAsync();
+    }
 }

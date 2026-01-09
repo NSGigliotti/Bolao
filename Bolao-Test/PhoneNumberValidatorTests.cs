@@ -1,4 +1,3 @@
-using Xunit;
 using Bolao.Services;
 
 namespace Bolao.Tests;

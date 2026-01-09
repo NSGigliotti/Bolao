@@ -41,7 +41,8 @@ public class JwtService
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key), 
                 SecurityAlgorithms.HmacSha256Signature
-            )
+            ),
+           // Expires = DateTime.UtcNow.AddHours(8)
         };
         
         var token = tokenHandler.CreateToken(tokenDescriptor);

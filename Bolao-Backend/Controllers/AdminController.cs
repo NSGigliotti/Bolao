@@ -5,6 +5,7 @@ using Bolao.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sprache;
 
 
 [ApiController]
@@ -30,7 +31,7 @@ public class AdminController : ControllerBase
             return Ok(status);
         }
         catch (Exception ex)
-        {   
+        {
             return BadRequest(ex.Message);
         }
     }
@@ -39,8 +40,15 @@ public class AdminController : ControllerBase
     [HttpPost("ResultUpdate")]
     public async Task<IActionResult> ResultUpdate([FromBody] ResultUpdateDTOs resultUpdateDTOs)
     {
-        
-        return Ok("");
+        try
+        {
+            string result = await _adminService.ResultUpdate(resultUpdateDTOs);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
 }

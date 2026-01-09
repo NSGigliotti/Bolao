@@ -13,7 +13,7 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<string> RegisterUserAsync(CreateUserDTOs createUser)
+    public async Task<LoginPayloadDTOs> RegisterUserAsync(CreateUserDTOs createUser)
     {
         if (string.IsNullOrWhiteSpace(createUser.Email)) throw new Exception("Email Necessário");
         if (await _userRepository.CheckEmailExist(createUser.Email)) throw new Exception("Email Já Utilizado");
@@ -38,10 +38,14 @@ public class UserService : IUserService
 
         UserModel newUser = await _userRepository.CreateUser(user);
 
-        return _userRepository.CreatToken(newUser);
+        var token = _userRepository.CreatToken(newUser);
+
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token);
+
+        return loginPayload;
     }
 
-    public async Task<string> LoginAsync(LoginDTOs login)
+    public async Task<LoginPayloadDTOs> LoginAsync(LoginDTOs login)
     {
         UserModel user = await _userRepository.GetUserFromEmail(login.Email);
         if (user == null) throw new Exception("E-mail ou senha inválidos");
@@ -51,6 +55,10 @@ public class UserService : IUserService
 
         if (result == PasswordVerificationResult.Failed) throw new Exception("E-mail ou senha inválidos");
 
-        return _userRepository.CreatToken(user);
+        var token = _userRepository.CreatToken(user);
+
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token);
+
+        return loginPayload;
     }
 }
