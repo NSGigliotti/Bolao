@@ -7,6 +7,7 @@ public interface IUserRepository
     Task<UserModel> GetUserFromEmail (string email);
     Task<UserModel> GetUserFromID (Guid id);
     Task<List<UserModel>> GetAllUsers();
+    Task<List<UserModel>> UpdateAllUsers(List<UserModel> users);
     bool CheckEmailValid(string email);
     Task<bool> CheckEmailExist(string email);
     string CreatToken(UserModel user);

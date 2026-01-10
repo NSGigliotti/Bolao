@@ -64,4 +64,14 @@ public class MachesRepository : IMachesRepository
         _bolaoDbContext.Prediction.Update(prediction);
         await _bolaoDbContext.SaveChangesAsync();
     }
+
+    public async Task UpdatePredictionsRangeAsync(List<PredictionModel> predictions)
+    {
+        foreach (var prediction in predictions)
+        {
+            _bolaoDbContext.Prediction.Attach(prediction);
+            _bolaoDbContext.Entry(prediction).Property(x => x.PointsGained).IsModified = true;
+        }
+        await _bolaoDbContext.SaveChangesAsync();
+    }
 }

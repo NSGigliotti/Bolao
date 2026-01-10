@@ -63,7 +63,7 @@ public class UserRepository : IUserRepository
 
     public async Task<List<UserModel>> GetAllUsers()
     {
-        List<UserModel> users = await _BolaoDbContext.Users.AsNoTracking().ToListAsync();
+        List<UserModel> users = await _BolaoDbContext.Users.ToListAsync();
         return users;
     }
 
@@ -77,6 +77,14 @@ public class UserRepository : IUserRepository
     {
         UserModel user = await _BolaoDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
         return user;
+    }
+
+    public async Task<List<UserModel>> UpdateAllUsers(List<UserModel> users)
+    {
+        _BolaoDbContext.Users.UpdateRange(users);
+        await _BolaoDbContext.SaveChangesAsync();
+
+        return users;
     }
 
     public async Task<UserModel> UpdateUser(UserModel user)

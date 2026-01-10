@@ -73,6 +73,17 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options => 
 {
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true, // Ele verificará a data de 100 anos
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWT_ISSUER"] ?? "DefaultIssuer",
+        ValidAudience = builder.Configuration["JWT_AUDIENCE"] ?? "DefaultAudience",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET_KEY"])),
+        ClockSkew = TimeSpan.Zero 
+    };
 
     options.Events = new JwtBearerEvents
 {

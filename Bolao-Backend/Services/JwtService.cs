@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 public class JwtService
 {
-    private readonly string _jwtSecret;                                                                                                                                                                                                                                                                                                                                                                         
+    private readonly string _jwtSecret;
     private readonly string _jwtIssuer;
     private readonly string _jwtAudience;
 
@@ -21,7 +21,7 @@ public class JwtService
     public string GenerateToken(UserModel user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_jwtSecret); 
+        var key = Encoding.ASCII.GetBytes(_jwtSecret);
 
         Console.WriteLine("ISADMIN : " + user.IsAdmin);
 
@@ -38,17 +38,17 @@ public class JwtService
             Subject = new ClaimsIdentity(claims),
             Issuer = _jwtIssuer,
             Audience = _jwtAudience,
+            Expires = DateTime.UtcNow.AddYears(100),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
-                SecurityAlgorithms.HmacSha256Signature
-            ),
-           // Expires = DateTime.UtcNow.AddHours(8)
+        new SymmetricSecurityKey(key),
+        SecurityAlgorithms.HmacSha256Signature
+    ),
         };
-        
+
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
 
-    
-    
+
+
 }

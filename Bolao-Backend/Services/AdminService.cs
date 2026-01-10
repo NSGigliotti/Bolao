@@ -40,77 +40,59 @@ public class AdminService : IAdminService
 
     public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
     {
-
         MatchModel match = await _iMachesRepository.GetMatchAsync(resultUpdateDTOs.MachID);
 
-        if (resultUpdateDTOs.HomeTeamScore != match.HomeTeamScore)
-        {
-            match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
-        }
-        else if (resultUpdateDTOs.AwayTeamScore != match.AwayTeamScore)
-        {
-            match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
-        }
-
-        // List<PredictionModel> predictions = await _iMaachesRepository.GetAllPedicitonByMachsId(resultUpdateDTOs.MachID);
-        List<UserModel> users = await _userRepository.GetAllUsers();
-
-        // throw new NotImplementedException();
+        if (match == null) throw new Exception("Partida não encontrada");
 
         match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
         match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
+        await _iMachesRepository.UpdateMatchAsync(match);
 
-        // Opcional: Atualizar status ou vencedor se necessário
-        // match.Status = ... 
-
-        //await _iMachesRepository.UpdateMatchAsync(match);
-
-        // 2. Buscar todas as predições para este jogo
         List<PredictionModel> predictions = await _iMachesRepository.GetAllPedicitonByMachsId(match.Id);
+        List<UserModel> users = new List<UserModel>();
 
-        Console.WriteLine("vai entrar dentro do for");
         foreach (var prediction in predictions)
         {
-            Console.WriteLine("passou dentro do for");
-            // Buscamos o usuário dono da aposta
             var user = await _userRepository.GetUserFromID(prediction.UserId);
             if (user == null) continue;
 
-            // Subtraímos a pontuação antiga que esta aposta tinha gerado para o usuário
             user.Score -= prediction.PointsGained;
 
-            // 3. Lógica de cálculo da nova pontuação
             int newPoints = 0;
-
-            // Determinar vencedores (ou empate)
             bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
+            Console.WriteLine(realHomeWinner);
             bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
+            Console.WriteLine(realAwayWinner);
             bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
+            Console.WriteLine(realDraw);
 
             bool predHomeWinner = prediction.HomeTeamScore > prediction.AwayTeamScore;
+            Console.WriteLine(predHomeWinner);
             bool predAwayWinner = prediction.AwayTeamScore > prediction.HomeTeamScore;
+            Console.WriteLine(predAwayWinner);
             bool predDraw = prediction.HomeTeamScore == prediction.AwayTeamScore;
+            Console.WriteLine(predDraw);
 
-            // ACERTO EM CHEIO (Placar exato): 3 Pontos
             if (prediction.HomeTeamScore == match.HomeTeamScore && prediction.AwayTeamScore == match.AwayTeamScore)
             {
                 newPoints = 3;
             }
-            // ACERTO DE TENDÊNCIA (Acertou quem venceu ou o empate, mas errou o placar): 1 Ponto
             else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
             {
                 newPoints = 1;
             }
 
-            // 4. Atualizar os dados
-            prediction.PointsGained = newPoints;
-            user.Score += newPoints;
-            Console.WriteLine("User Score: " + user.Score);
+            if (prediction.PointsGained != newPoints)
+            {
+                prediction.PointsGained = newPoints;
+            }
 
-            // Salvar as alterações
-            await _iMachesRepository.UpdatePredictionAsync(prediction);
-            await _userRepository.UpdateUser(user);
+            user.Score += newPoints;
         }
-        return ("ok");
+
+        await _iMachesRepository.UpdatePredictionsRangeAsync(predictions);
+        await _userRepository.UpdateAllUsers(users);
+
+        return "ok";
     }
 }
