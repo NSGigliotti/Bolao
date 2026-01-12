@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bolao_Backend.Migrations
 {
     [DbContext(typeof(BolaoDbContext))]
-    [Migration("20251231134204_InitialCreate")]
+    [Migration("20260112200450_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -77,7 +77,13 @@ namespace Bolao_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("AwayTeamId")
+                        .HasColumnType("int");
+
                     b.Property<int>("AwayTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("HomeTeamScore")
@@ -86,17 +92,17 @@ namespace Bolao_Backend.Migrations
                     b.Property<int>("MatchId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("PointsGained")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId1")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MatchId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Prediction");
                 });
@@ -225,7 +231,7 @@ namespace Bolao_Backend.Migrations
 
                     b.HasOne("Bolao.Models.UserModel", "User")
                         .WithMany()
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

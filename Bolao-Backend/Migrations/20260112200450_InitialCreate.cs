@@ -111,11 +111,13 @@ namespace Bolao_Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     MatchId = table.Column<int>(type: "int", nullable: false),
+                    HomeTeamId = table.Column<int>(type: "int", nullable: false),
                     HomeTeamScore = table.Column<int>(type: "int", nullable: false),
-                    AwayTeamScore = table.Column<int>(type: "int", nullable: false)
+                    AwayTeamId = table.Column<int>(type: "int", nullable: false),
+                    AwayTeamScore = table.Column<int>(type: "int", nullable: false),
+                    PointsGained = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,8 +129,8 @@ namespace Bolao_Backend.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Prediction_Users_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_Prediction_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -156,9 +158,9 @@ namespace Bolao_Backend.Migrations
                 column: "MatchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Prediction_UserId1",
+                name: "IX_Prediction_UserId",
                 table: "Prediction",
-                column: "UserId1");
+                column: "UserId");
         }
 
         /// <inheritdoc />

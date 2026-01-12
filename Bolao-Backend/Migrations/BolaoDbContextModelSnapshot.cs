@@ -74,7 +74,13 @@ namespace Bolao_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("AwayTeamId")
+                        .HasColumnType("int");
+
                     b.Property<int>("AwayTeamScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("HomeTeamScore")

@@ -1,4 +1,5 @@
 using Bolao.DTOs;
+using Bolao.Enum;
 using Bolao.Interfaces;
 using Bolao.Models;
 
@@ -49,46 +50,82 @@ public class AdminService : IAdminService
         await _iMachesRepository.UpdateMatchAsync(match);
 
         List<PredictionModel> predictions = await _iMachesRepository.GetAllPedicitonByMachsId(match.Id);
-        List<UserModel> users = new List<UserModel>();
+        List<UserModel> users = await _userRepository.GetAllUsers();
 
-        foreach (var prediction in predictions)
+        bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
+
+        if (isGroupStage)
         {
-            var user = await _userRepository.GetUserFromID(prediction.UserId);
-            if (user == null) continue;
-
-            user.Score -= prediction.PointsGained;
-
-            int newPoints = 0;
-            bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
-            Console.WriteLine(realHomeWinner);
-            bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
-            Console.WriteLine(realAwayWinner);
-            bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
-            Console.WriteLine(realDraw);
-
-            bool predHomeWinner = prediction.HomeTeamScore > prediction.AwayTeamScore;
-            Console.WriteLine(predHomeWinner);
-            bool predAwayWinner = prediction.AwayTeamScore > prediction.HomeTeamScore;
-            Console.WriteLine(predAwayWinner);
-            bool predDraw = prediction.HomeTeamScore == prediction.AwayTeamScore;
-            Console.WriteLine(predDraw);
-
-            if (prediction.HomeTeamScore == match.HomeTeamScore && prediction.AwayTeamScore == match.AwayTeamScore)
+            for (int i = 0; i < predictions.Count; i++)
             {
-                newPoints = 3;
-            }
-            else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
-            {
-                newPoints = 1;
-            }
+                users[i].Score -= predictions[i].PointsGained;
 
-            if (prediction.PointsGained != newPoints)
-            {
-                prediction.PointsGained = newPoints;
+                int newPoints = 0;
+
+                bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
+                bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
+                bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
+
+                bool predHomeWinner = predictions[i].HomeTeamScore > predictions[i].AwayTeamScore;
+                bool predAwayWinner = predictions[i].AwayTeamScore > predictions[i].HomeTeamScore;
+                bool predDraw = predictions[i].HomeTeamScore == predictions[i].AwayTeamScore;
+
+                if (predictions[i].HomeTeamScore == match.HomeTeamScore && predictions[i].AwayTeamScore == match.AwayTeamScore)
+                {
+                    newPoints = 3;
+                }
+                else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
+                {
+                    newPoints = 1;
+                }
+
+                if (predictions[i].PointsGained != newPoints)
+                {
+                    predictions[i].PointsGained = newPoints;
+                }
+
+                users[i].Score += newPoints;
             }
 
-            user.Score += newPoints;
         }
+        else
+        {
+            for (int i = 0; i < predictions.Count; i++)
+            {
+                var user = users.FirstOrDefault(u => u.Id == predictions[i].UserId);
+                if (user == null) continue;
+
+                user.Score -= predictions[i].PointsGained;
+
+                int newPoints = 0;
+
+                bool correctTeams = predictions[i].HomeTeamId == match.HomeTeamId && predictions[i].AwayTeamId == match.AwayTeamId;
+
+                if (correctTeams)
+                {
+                    bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
+                    bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
+                    bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
+
+                    bool predHomeWinner = predictions[i].HomeTeamScore > predictions[i].AwayTeamScore;
+                    bool predAwayWinner = predictions[i].AwayTeamScore > predictions[i].HomeTeamScore;
+                    bool predDraw = predictions[i].HomeTeamScore == predictions[i].AwayTeamScore;
+
+                    if (predictions[i].HomeTeamScore == match.HomeTeamScore && predictions[i].AwayTeamScore == match.AwayTeamScore)
+                    {
+                        newPoints = 3;
+                    }
+                    else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
+                    {
+                        newPoints = 1;
+                    }
+                }
+
+                predictions[i].PointsGained = newPoints;
+                user.Score += newPoints;
+            }
+        }
+
 
         await _iMachesRepository.UpdatePredictionsRangeAsync(predictions);
         await _userRepository.UpdateAllUsers(users);
