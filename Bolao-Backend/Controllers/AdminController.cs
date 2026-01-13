@@ -51,4 +51,19 @@ public class AdminController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("AddTeamKnockoutStage")]
+    public async Task<IActionResult> AddTeamKnockoutStage([FromBody] AddTeamKnockout addTeamKnockout)
+    {
+        try
+        {
+            string result = await _adminService.AddTeamKnockoutStage(addTeamKnockout);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
 }

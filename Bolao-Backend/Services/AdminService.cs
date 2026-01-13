@@ -2,17 +2,18 @@ using Bolao.DTOs;
 using Bolao.Enum;
 using Bolao.Interfaces;
 using Bolao.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 public class AdminService : IAdminService
 {
 
     private readonly IUserRepository _userRepository;
-    private readonly IMachesRepository _iMachesRepository;
+    private readonly IMachesRepository _iMatchRepository;
 
     public AdminService(IUserRepository userRepository, IMachesRepository machesRepository)
     {
         _userRepository = userRepository;
-        _iMachesRepository = machesRepository;
+        _iMatchRepository = machesRepository;
     }
 
     public async Task<string> PlaymentUpdate(PaymentUpdateDTOs payment)
@@ -41,15 +42,15 @@ public class AdminService : IAdminService
 
     public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
     {
-        MatchModel match = await _iMachesRepository.GetMatchAsync(resultUpdateDTOs.MachID);
+        MatchModel match = await _iMatchRepository.GetMatchAsync(resultUpdateDTOs.MachID);
 
         if (match == null) throw new Exception("Partida não encontrada");
 
         match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
         match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
-        await _iMachesRepository.UpdateMatchAsync(match);
+        await _iMatchRepository.UpdateMatchAsync(match);
 
-        List<PredictionModel> predictions = await _iMachesRepository.GetAllPedicitonByMachsId(match.Id);
+        List<PredictionModel> predictions = await _iMatchRepository.GetAllPedicitonByMachsId(match.Id);
         List<UserModel> users = await _userRepository.GetAllUsers();
 
         bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
@@ -127,9 +128,34 @@ public class AdminService : IAdminService
         }
 
 
-        await _iMachesRepository.UpdatePredictionsRangeAsync(predictions);
+        await _iMatchRepository.UpdatePredictionsRangeAsync(predictions);
         await _userRepository.UpdateAllUsers(users);
 
         return "ok";
+    }
+
+    public async Task<string> AddTeamKnockoutStage(AddTeamKnockout addTeamKnockout)
+    {
+        var match = await _iMatchRepository.GetMatchAsync(addTeamKnockout.IdMacht);
+
+        bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
+
+        if (!isGroupStage)
+        {
+            match.HomeTeamId = addTeamKnockout.IdHomeTeam;
+            match.AwayTeamId = addTeamKnockout.IdAwayTeam;
+
+            match.AwayTeamScore = 0;
+            match.HomeTeamScore = 0;
+
+            await _iMatchRepository.UpdateMatchAsync(match);
+
+        }
+        else throw new Exception("Jogo fora da fase mata-mata");
+
+
+
+        return "Jogo adicionado com sucesso";
+
     }
 }
