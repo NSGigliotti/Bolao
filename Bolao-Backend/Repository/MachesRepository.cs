@@ -1,5 +1,6 @@
 
 using Bolao.Data;
+using Bolao.DTOs;
 using Bolao.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -73,5 +74,11 @@ public class MachesRepository : IMachesRepository
             _bolaoDbContext.Entry(prediction).Property(x => x.PointsGained).IsModified = true;
         }
         await _bolaoDbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<UserModel>> GetAllRankUsers()
+    {
+        List<UserModel> users = await _bolaoDbContext.Users.ToListAsync();
+        return users;
     }
 }

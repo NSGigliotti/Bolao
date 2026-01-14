@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Bolao.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Bolao.Interfaces;
 
 [ApiController]
 [Route("Maches")]
@@ -52,8 +54,20 @@ public class MachesController : ControllerBase
 
             return BadRequest(ex.Message);
         }
+    }
 
-
+    [HttpGet("GetAllRankUser")]
+    public async Task<IActionResult> GetAllRankUser()
+    {
+        try
+        {
+            List<UserRankPayloadDTOs> userRanks = await _machesService.GetAllRankUser();
+            return Ok(userRanks);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
 

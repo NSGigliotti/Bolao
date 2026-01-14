@@ -69,7 +69,7 @@ public class MachesService : IMachesService
 
         if (makePredictionDTOs.Count != 104) throw new Exception();
 
-        if(await _machesRepository.UserHasPredictions(id)) throw new Exception("Usuario com o bolao ja criado");
+        if (await _machesRepository.UserHasPredictions(id)) throw new Exception("Usuario com o bolao ja criado");
 
         List<PredictionModel> userBolao = [];
 
@@ -96,7 +96,7 @@ public class MachesService : IMachesService
 
         return "Jogo Criado";
     }
-        public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
+    public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
     {
         MatchModel match = await _machesRepository.GetMatchAsync(resultUpdateDTOs.MachID);
         if (match == null) return "Partida não encontrada";
@@ -115,7 +115,7 @@ public class MachesService : IMachesService
 
             int predictionResult = prediction.HomeTeamScore > prediction.AwayTeamScore ? 1 : prediction.AwayTeamScore > prediction.HomeTeamScore ? 2 : 0;
 
-            if (prediction.HomeTeamScore == match.HomeTeamScore && 
+            if (prediction.HomeTeamScore == match.HomeTeamScore &&
                 prediction.AwayTeamScore == match.AwayTeamScore)
             {
                 pointsEarned = 3;
@@ -130,5 +130,23 @@ public class MachesService : IMachesService
         }
 
         return "Placares e pontuações atualizados com sucesso";
+    }
+
+    public async Task<List<UserRankPayloadDTOs>> GetAllRankUser()
+    {
+        List<UserModel> users = await _machesRepository.GetAllRankUsers();
+        List<UserRankPayloadDTOs> userRanks = [];
+        foreach (var i in users)
+        {
+            UserRankPayloadDTOs userRank = new UserRankPayloadDTOs(
+                id: i.Id,
+                name: i.Name,
+                score: i.Score
+            );
+            userRanks.Add(userRank);
+        }
+
+        userRanks = userRanks.OrderByDescending(u => u.Score).ThenBy(u => u.Name).ToList();
+        return userRanks;
     }
 }

@@ -13,4 +13,5 @@ public interface IMachesRepository
    Task<List<PredictionModel>> GetAllPedicitonByMachsId (int id);
    Task UpdateMatchAsync(MatchModel match);
    Task UpdatePredictionAsync(PredictionModel prediction);
+   Task<List<UserModel>> GetAllRankUsers();
 }
