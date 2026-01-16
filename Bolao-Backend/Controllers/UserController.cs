@@ -12,7 +12,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpPost("CreatUser")]
+    [HttpPost("Register")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDTOs createUser)
     {
         try 

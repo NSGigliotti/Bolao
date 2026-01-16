@@ -40,7 +40,7 @@ public class UserService : IUserService
 
         var token = _userRepository.CreatToken(newUser);
 
-        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token);
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token , gameMake: user.GameMake, payment:user.Status  );
 
         return loginPayload;
     }
@@ -57,7 +57,7 @@ public class UserService : IUserService
 
         var token = _userRepository.CreatToken(user);
 
-        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token);
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token , gameMake: user.GameMake, payment:user.Status  );
 
         return loginPayload;
     }

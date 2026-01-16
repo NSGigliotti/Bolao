@@ -30,6 +30,7 @@ public class JwtService
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
+            new Claim("GameMake", user.GameMake.ToString().ToLower()), // Add GameMake claim
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
