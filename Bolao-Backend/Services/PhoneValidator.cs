@@ -27,7 +27,6 @@ public class PhoneNumberValidator
         }
         catch (NumberParseException e)
         {
-            Console.WriteLine($"Erro ao analisar o número: {e.Message}");
             return false;
         }
     }

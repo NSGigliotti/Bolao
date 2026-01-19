@@ -37,7 +37,6 @@ public class MachesController : ControllerBase
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        Console.WriteLine(userId);
 
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid id)) return Unauthorized("Usuário não identificado ou formato de ID inválido.");
 

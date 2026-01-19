@@ -23,8 +23,6 @@ public class JwtService
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSecret);
 
-        Console.WriteLine("ISADMIN : " + user.IsAdmin);
-
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),

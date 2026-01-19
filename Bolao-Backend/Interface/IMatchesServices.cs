@@ -7,6 +7,6 @@ public interface IMachesService
 {
     Task<List<GroupDto>> GetGroupsAsync();
     Task<List<MatchDto>> GetAllMatch();
-    Task<string> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id);
+    Task<LoginPayloadDTOs> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id);
     Task<List<UserRankPayloadDTOs>> GetAllRankUser();
 }

@@ -35,15 +35,14 @@ public class MachesService : IMachesService
 
     public async Task<List<MatchDto>> GetAllMatch()
     {
-        var allMatch = await _machesRepository.GetAllMatch();
 
+        var allMatch = await _machesRepository.GetAllMatch();
 
         var groupedMatches = allMatch.OrderBy(m => m.MatchDate).GroupBy(m => m.Stage).Select(g => new MatchDto
         {
             StageName = GetStageName(g.Key),
-            Matchs = g.ToList()
-        }).ToList();
-
+            Matchs = g.OrderBy(m => m.MatchDate).ToList()
+        }).OrderBy(dto => dto.Matchs.FirstOrDefault()?.MatchDate).ToList();
 
         return groupedMatches;
     }
@@ -63,7 +62,7 @@ public class MachesService : IMachesService
         return groupedTeams;
     }
 
-    public async Task<string> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id)
+    public async Task<LoginPayloadDTOs> CreatePrediction(List<MakePredictionDTOs> makePredictionDTOs, Guid id)
     {
         if (makePredictionDTOs == null) throw new Exception("Lista do bolao invalida");
 
@@ -93,8 +92,11 @@ public class MachesService : IMachesService
         user.GameMake = true;
         await _userRepository.UpdateUser(user);
 
+        var token = _userRepository.CreatToken(user);
 
-        return "Jogo Criado";
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token, gameMake: user.GameMake, payment: user.Status);
+
+        return loginPayload;
     }
     public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
     {

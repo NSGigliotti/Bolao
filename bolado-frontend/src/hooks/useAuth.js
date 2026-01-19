@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { API_ENDPOINTS } from '../services/api'; // Importa os links
 import { useAuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const useAuth = () => {
     const { login } = useAuthContext();
@@ -61,7 +62,7 @@ export const useAuth = () => {
                 const token = typeof data === 'string' ? data : data.token;
 
                 const user = login(token); // login now returns user data
-                alert(isLogin ? "Sucesso no Login!" : "Registo concluído!");
+                toast.success(isLogin ? "Sucesso no Login!" : "Registo concluído!");
 
                 // Check GameMake property (handling case sensitivity and string/boolean types)
                 const gameMake = user.GameMake === 'true' || user.gamemake === 'true' || user.GameMake === true || user.gamemake === true;
@@ -93,12 +94,12 @@ export const useAuth = () => {
                     }
                 }
 
-                alert(errorMessage || "Erro desconhecido.");
+                toast.error(errorMessage || "Erro desconhecido.");
             }
         } catch (err) {
             console.error("Auth Exception:", err);
 
-            alert("Erro ao conectar ao servidor. Verifique se o backend está ligado.");
+            toast.error("Erro ao conectar ao servidor. Verifique se o backend está ligado.");
         } finally {
             setLoading(false);
         }

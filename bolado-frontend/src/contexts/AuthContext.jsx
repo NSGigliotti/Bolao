@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             try {
                 const userData = decodeToken(token);
-                // Check if token is expired? The decoding logic can handle basic expiration check if needed
                 setUser(userData);
             } catch (error) {
                 console.error("Invalid token found", error);
@@ -33,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    // Helper to decode JWT payload safely
     const decodeToken = (token) => {
         try {
             const base64Url = token.split('.')[1];
@@ -44,12 +42,10 @@ export const AuthProvider = ({ children }) => {
 
             const decoded = JSON.parse(jsonPayload);
 
-            // Map typical claims to a user object
             return {
                 id: decoded.nameid || decoded.sub,
                 name: decoded.unique_name || decoded.name,
                 role: decoded.role,
-                // Add other fields as needed
                 ...decoded
             };
         } catch (e) {
@@ -57,8 +53,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateUser = (updates) => {
+        setUser(prev => prev ? { ...prev, ...updates } : prev);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

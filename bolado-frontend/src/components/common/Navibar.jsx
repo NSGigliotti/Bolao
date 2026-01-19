@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +7,6 @@ const Navbar = () => {
   const { user, logout } = useAuthContext();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -27,44 +26,32 @@ const Navbar = () => {
             <div className="hidden md:ml-10 md:flex md:space-x-8">
               <a href="/dashboard" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Dashboard</a>
               <a href="/projetos" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Meu Bolao</a>
+              {user && !(user.GameMake === 'true' || user.gamemake === 'true' || user.GameMake === true || user.gamemake === true) && (
+                <a href="/gamemake" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
+                  Fazer Jogo
+                </a>
+              )}
             </div>
           </div>
 
           {/* Lado Direito: Ações de Usuário */}
           <div className="hidden md:flex md:items-center">
             {user ? (
-              <div className="relative ml-3">
-                {/* Botão do Perfil (Dropdown) */}
-                <button
-                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center space-x-3 focus:outline-none"
-                >
-                  <div className="text-right">
+              <div className="flex items-center ml-3 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-right hidden lg:block">
                     <p className="text-sm font-medium text-gray-900 leading-none">{user.name}</p>
                     <p className="text-xs text-gray-500 mt-1">{user.email}</p>
                   </div>
-                  <img
-                    className="h-9 w-9 rounded-full object-cover border-2 border-indigo-100"
-                    src={user.avatarUrl || "https://ui-avatars.com/api/?name=" + user.name}
-                    alt="Foto de perfil"
-                  />
-                  <ChevronDown size={16} className={`text-gray-400 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+                </div>
 
-                {/* Dropdown Menu Desktop */}
-                {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                      <User size={16} className="mr-2" /> Meu Perfil
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut size={16} className="mr-2" /> Sair
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  title="Sair"
+                >
+                  <LogOut size={20} />
+                </button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
@@ -100,7 +87,6 @@ const Navbar = () => {
             {user ? (
               <div className="px-4 space-y-3">
                 <div className="flex items-center">
-                  <img className="h-10 w-10 rounded-full" src={user.avatarUrl || "https://ui-avatars.com/api/?name=" + user.name} alt="" />
                   <div className="ml-3">
                     <div className="text-base font-medium text-gray-800">{user.name}</div>
                     <div className="text-sm font-medium text-gray-500">{user.email}</div>
