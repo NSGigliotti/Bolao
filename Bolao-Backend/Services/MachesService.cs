@@ -98,41 +98,42 @@ public class MachesService : IMachesService
 
         return loginPayload;
     }
-    public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
-    {
-        MatchModel match = await _machesRepository.GetMatchAsync(resultUpdateDTOs.MachID);
-        if (match == null) return "Partida não encontrada";
+    // public async Task<string> ResultUpdate(ResultUpdateDTOs resultUpdateDTOs)
+    // {
+    //     MatchModel match = await _machesRepository.GetMatchAsync(resultUpdateDTOs.MachID);
+    //     if (match == null) return "Partida não encontrada";
 
-        match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
-        match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
-        await _machesRepository.UpdateMatchAsync(match);
+    //     match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
+    //     match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
 
-        List<PredictionModel> predictions = await _machesRepository.GetAllPedicitonByMachsId(resultUpdateDTOs.MachID);
+    //     await _machesRepository.UpdateMatchAsync(match);
 
-        int officialResult = match.HomeTeamScore > match.AwayTeamScore ? 1 : match.HomeTeamScore < match.AwayTeamScore ? 2 : 0;
+    //     List<PredictionModel> predictions = await _machesRepository.GetAllPedicitonByMachsId(resultUpdateDTOs.MachID);
 
-        foreach (var prediction in predictions)
-        {
-            int pointsEarned = 0;
+    //     int officialResult = match.HomeTeamScore > match.AwayTeamScore ? 1 : match.HomeTeamScore < match.AwayTeamScore ? 2 : 0;
 
-            int predictionResult = prediction.HomeTeamScore > prediction.AwayTeamScore ? 1 : prediction.AwayTeamScore > prediction.HomeTeamScore ? 2 : 0;
+    //     foreach (var prediction in predictions)
+    //     {
+    //         int pointsEarned = 0;
 
-            if (prediction.HomeTeamScore == match.HomeTeamScore &&
-                prediction.AwayTeamScore == match.AwayTeamScore)
-            {
-                pointsEarned = 3;
-            }
-            else if (predictionResult == officialResult)
-            {
-                pointsEarned = 1;
-            }
+    //         int predictionResult = prediction.HomeTeamScore > prediction.AwayTeamScore ? 1 : prediction.AwayTeamScore > prediction.HomeTeamScore ? 2 : 0;
 
-            prediction.PointsGained = pointsEarned;
-            await _machesRepository.UpdatePredictionAsync(prediction);
-        }
+    //         if (prediction.HomeTeamScore == match.HomeTeamScore &&
+    //             prediction.AwayTeamScore == match.AwayTeamScore)
+    //         {
+    //             pointsEarned = 3;
+    //         }
+    //         else if (predictionResult == officialResult)
+    //         {
+    //             pointsEarned = 1;
+    //         }
 
-        return "Placares e pontuações atualizados com sucesso";
-    }
+    //         prediction.PointsGained = pointsEarned;
+    //         await _machesRepository.UpdatePredictionAsync(prediction);
+    //     }
+
+    //     return "Placares e pontuações atualizados com sucesso";
+    // }
 
     public async Task<List<UserRankPayloadDTOs>> GetAllRankUser()
     {
@@ -150,5 +151,12 @@ public class MachesService : IMachesService
 
         userRanks = userRanks.OrderByDescending(u => u.Score).ThenBy(u => u.Name).ToList();
         return userRanks;
+    }
+
+    public async Task<List<PredictionModel>> GetMachesByUserId(Guid id)
+    {
+        List<PredictionModel> predictions = await _machesRepository.GetAllPedicitonById(id);
+        predictions.Sort((x, y) => x.MatchId.CompareTo(y.MatchId));
+        return predictions;
     }
 }

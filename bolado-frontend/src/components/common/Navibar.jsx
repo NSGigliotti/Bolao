@@ -1,17 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu, X, LogOut } from 'lucide-react';
-import { useAuthContext } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavbar } from '../../hooks/useNavbar';
 
 const Navbar = () => {
-  const { user, logout } = useAuthContext();
-  const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/auth');
-  };
+  const { user, isMobileMenuOpen, setIsMobileMenuOpen, handleLogout, hasGameMake, navigate } = useNavbar();
 
   return (
     <nav className="bg-white border-b border-gray-200 fixed w-full z-50 top-0">
@@ -23,13 +15,22 @@ const Navbar = () => {
             <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
               <span className="ml-2 text-xl font-bold text-gray-900">Bolao</span>
             </div>
+            <div className="ml-6 flex items-center">
+              <a href="/grups" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Grupos</a>
+              <a href="/rank" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Ranking</a>
+            </div>
             <div className="hidden md:ml-10 md:flex md:space-x-8">
               <a href="/dashboard" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Dashboard</a>
-              <a href="/projetos" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Meu Bolao</a>
-              {user && !(user.GameMake === 'true' || user.gamemake === 'true' || user.GameMake === true || user.gamemake === true) && (
-                <a href="/gamemake" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
-                  Fazer Jogo
-                </a>
+              {user && (
+                hasGameMake ? (
+                  <a href="/mygame" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
+                    Meu Jogo
+                  </a>
+                ) : (
+                  <a href="/gamemake" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
+                    Fazer Jogo
+                  </a>
+                )
               )}
             </div>
           </div>
@@ -79,6 +80,8 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="pt-2 pb-3 space-y-1">
+            <a href="/grups" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Grupos</a>
+            <a href="/rank" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Ranking</a>
             <a href="/dashboard" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Dashboard</a>
             <a href="/projetos" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Projetos</a>
           </div>

@@ -46,14 +46,139 @@ public class AdminService : IAdminService
 
         if (match == null) throw new Exception("Partida não encontrada");
 
-        match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
-        match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
-        await _iMatchRepository.UpdateMatchAsync(match);
+
+        TeamModel team1 = await _iMatchRepository.GetTeamById(match.HomeTeamId);
+        TeamModel team2 = await _iMatchRepository.GetTeamById(match.AwayTeamId);
+
+        bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
+
+
+        if (isGroupStage)
+        {
+            if (match.HomeTeamScore > resultUpdateDTOs.HomeTeamScore)
+            {
+                team1.GoalsFor = team1.GoalsFor - 1;
+                team2.GoalsAgainst = team2.GoalsAgainst - 1;
+            }
+            else if (match.HomeTeamScore < resultUpdateDTOs.HomeTeamScore)
+            {
+                team1.GoalsFor = team1.GoalsFor + 1;
+                team2.GoalsAgainst = team2.GoalsAgainst + 1;
+            }
+
+            if (match.AwayTeamScore > resultUpdateDTOs.AwayTeamScore)
+            {
+                team1.GoalsAgainst = team1.GoalsAgainst - 1;
+                team2.GoalsFor = team2.GoalsFor - 1;
+            }
+            else if (match.AwayTeamScore < resultUpdateDTOs.AwayTeamScore)
+            {
+                team1.GoalsAgainst = team1.GoalsAgainst + 1;
+                team2.GoalsFor = team2.GoalsFor + 1;
+            }
+        }
+
 
         List<PredictionModel> predictions = await _iMatchRepository.GetAllPedicitonByMachsId(match.Id);
         List<UserModel> users = await _userRepository.GetAllUsers();
 
-        bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
+
+        int oldPoints1 = 0;
+        int oldPoints2 = 0;
+
+        if (isGroupStage && match.Status == MatchStatus.Finished && match.HomeTeamScore.HasValue && match.AwayTeamScore.HasValue)
+        {
+            if (match.HomeTeamScore > match.AwayTeamScore) oldPoints1 = 3;
+            else if (match.HomeTeamScore < match.AwayTeamScore) oldPoints2 = 3;
+            else { oldPoints1 = 1; oldPoints2 = 1; }
+        }
+
+        int newPoints1 = 0;
+        int newPoints2 = 0;
+        int? newWinnerId = null;
+
+        if (resultUpdateDTOs.HomeTeamScore > resultUpdateDTOs.AwayTeamScore)
+        {
+            newWinnerId = match.HomeTeamId;
+            newPoints1 = 3;
+        }
+        else if (resultUpdateDTOs.HomeTeamScore < resultUpdateDTOs.AwayTeamScore)
+        {
+            newWinnerId = match.AwayTeamId;
+            newPoints2 = 3;
+        }
+        else
+        {
+            newWinnerId = null; 
+            newPoints1 = 1;
+            newPoints2 = 1;
+        }
+
+        if (isGroupStage)
+        {
+            if (team1 != null) team1.Points = team1.Points - oldPoints1 + newPoints1;
+            if (team2 != null) team2.Points = team2.Points - oldPoints2 + newPoints2;
+        }
+
+        match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
+        match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
+        match.WinnerId = newWinnerId;
+        match.Status = MatchStatus.Finished; 
+
+        foreach (var prediction in predictions)
+        {
+            var user = users.FirstOrDefault(u => u.Id == prediction.UserId);
+            if (user == null) continue;
+
+            user.Score -= prediction.PointsGained;
+            int earnedPoints = 0;
+
+            if (isGroupStage)
+            {
+                bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
+                bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
+                bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
+
+                bool predHomeWinner = prediction.HomeTeamScore > prediction.AwayTeamScore;
+                bool predAwayWinner = prediction.AwayTeamScore > prediction.HomeTeamScore;
+                bool predDraw = prediction.HomeTeamScore == prediction.AwayTeamScore;
+
+                if (prediction.HomeTeamScore == match.HomeTeamScore && prediction.AwayTeamScore == match.AwayTeamScore)
+                {
+                    earnedPoints = 3;
+                }
+                else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
+                {
+                    earnedPoints = 1;
+                }
+            }
+            else 
+            {
+                bool correctTeams = prediction.HomeTeamId == match.HomeTeamId && prediction.AwayTeamId == match.AwayTeamId;
+                if (correctTeams)
+                {
+                    bool realHomeWinner = match.HomeTeamScore > match.AwayTeamScore;
+                    bool realAwayWinner = match.AwayTeamScore > match.HomeTeamScore;
+                    bool realDraw = match.HomeTeamScore == match.AwayTeamScore;
+
+                    bool predHomeWinner = prediction.HomeTeamScore > prediction.AwayTeamScore;
+                    bool predAwayWinner = prediction.AwayTeamScore > prediction.HomeTeamScore;
+                    bool predDraw = prediction.HomeTeamScore == prediction.AwayTeamScore;
+
+                    if (prediction.HomeTeamScore == match.HomeTeamScore && prediction.AwayTeamScore == match.AwayTeamScore)
+                    {
+                        earnedPoints = 3;
+                    }
+                    else if ((realHomeWinner && predHomeWinner) || (realAwayWinner && predAwayWinner) || (realDraw && predDraw))
+                    {
+                        earnedPoints = 1;
+                    }
+                }
+            }
+
+            prediction.PointsGained = earnedPoints;
+            user.Score += earnedPoints;
+        }
 
         if (isGroupStage)
         {
@@ -127,7 +252,9 @@ public class AdminService : IAdminService
             }
         }
 
-
+        await _iMatchRepository.UpdateTeam(team1);
+        await _iMatchRepository.UpdateTeam(team2);
+        await _iMatchRepository.UpdateMatchAsync(match);
         await _iMatchRepository.UpdatePredictionsRangeAsync(predictions);
         await _userRepository.UpdateAllUsers(users);
 

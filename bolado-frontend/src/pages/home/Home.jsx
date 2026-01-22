@@ -1,36 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Trophy, Loader2, AlertCircle } from 'lucide-react';
 import Navbar from '../../components/common/Navibar';
 import MatchGrid from '../../components/common/MatchGrid';
-import { API_ENDPOINTS } from '../../services/api';
+import { useHome } from '../../hooks/useHome';
 
 const HomePage = () => {
-    const [stageGroups, setStageGroups] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        const fetchMatches = async () => {
-            try {
-                const response = await fetch(API_ENDPOINTS.GET_MATCHES);
-                if (!response.ok) throw new Error('Erro na rede');
-                const data = await response.json();
-
-                // Debug logging
-                console.log('API Response:', data);
-                console.log('First stage group:', data[0]);
-                console.log('Total stage groups:', data.length);
-
-                setStageGroups(Array.isArray(data) ? data : []);
-            } catch (err) {
-                console.error("Erro ao buscar jogos:", err);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchMatches();
-    }, []);
+    const { stageGroups, loading, error } = useHome();
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">

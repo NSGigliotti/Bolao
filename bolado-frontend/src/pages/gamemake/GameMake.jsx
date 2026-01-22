@@ -1,200 +1,24 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Trophy, Save, Loader2, Calendar, AlertCircle, ChevronRight } from 'lucide-react';
 import Navbar from '../../components/common/Navibar';
-import { API_ENDPOINTS } from '../../services/api';
-import { useAuthContext } from '../../contexts/AuthContext';
-import { simulateKnockout } from '../../utils/bracketUtils';
-import toast from 'react-hot-toast';
+import { useGameMake } from '../../hooks/useGameMake';
 
 const GameMake = () => {
-    const navigate = useNavigate();
-    const { user, updateUser } = useAuthContext();
-    const [matches, setMatches] = useState([]); // Flat list of all matches
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [predictions, setPredictions] = useState({});
-    const [activeTab, setActiveTab] = useState('Groups');
-
-    // Knockout simulation state
-    const [simulatedTeams, setSimulatedTeams] = useState({}); // MatchID -> { home, away }
-
-    useEffect(() => {
-        fetchMatches();
-    }, []);
-
-    // Recalculate bracket whenever predictions change
-    useEffect(() => {
-        if (matches.length > 0) {
-            const simulated = simulateKnockout(matches, predictions);
-            setSimulatedTeams(simulated);
-        }
-    }, [predictions, matches]);
-
-    const fetchMatches = async () => {
-        try {
-            const response = await fetch(API_ENDPOINTS.GET_MATCHES);
-            if (!response.ok) throw new Error('Falha ao carregar jogos');
-            const data = await response.json();
-
-            // Should be a flat list of matches for the utility to work easier?
-            // The API returns grouped by stage (List<MatchDto>).
-            // We need to flatten it for the utility or adapt the utility.
-            // Let's flatten it here for local processing.
-            let flatMatches = [];
-            if (Array.isArray(data)) {
-                // Check if data is already flat or grouped
-                // API GetAllMaches returns List<MatchDto> where MatchDto has StageName and Matchs (List<MatchModel>)
-                if (data.length > 0 && data[0].matchs) {
-                    data.forEach(group => {
-                        if (group.matchs) flatMatches.push(...group.matchs);
-                    });
-                } else {
-                    // Assume flat list if no 'matchs' property found
-                    flatMatches = data;
-                }
-            }
-            // Sort by date or ID
-            flatMatches.sort((a, b) => a.id - b.id);
-
-            console.log("Loaded matches:", flatMatches.length);
-            setMatches(flatMatches);
-        } catch (error) {
-            console.error("Erro ao buscar jogos:", error);
-            toast.error("Erro ao carregar os jogos.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleScoreChange = (matchId, team, value) => {
-        const score = parseInt(value, 10);
-        if (isNaN(score) || score < 0) return;
-
-        setPredictions(prev => ({
-            ...prev,
-            [matchId]: {
-                ...prev[matchId],
-                [team]: score
-            }
-        }));
-    };
-
-    const handleSubmit = async () => {
-        if (!user) {
-            toast.error("Você precisa estar logado para salvar palpites.");
-            navigate('/auth');
-            return;
-        }
-
-        setSubmitting(true);
-        const token = localStorage.getItem('token');
-        const payload = [];
-
-        matches.forEach(match => {
-            const pred = predictions[match.id];
-            if (pred && pred.home !== undefined && pred.away !== undefined) {
-                // Determine teams: if original is null, use simulated
-                const sim = simulatedTeams[match.id];
-                const homeTeam = match.homeTeam || (sim ? sim.homeTeam : null);
-                const awayTeam = match.awayTeam || (sim ? sim.awayTeam : null);
-
-                payload.push({
-                    matchId: match.id,
-                    idHomeTeam: homeTeam ? homeTeam.id : 0,
-                    homeTeamName: homeTeam ? homeTeam.name : 'A Definir',
-                    homeTeamScore: pred.home,
-                    idAwayTeam: awayTeam ? awayTeam.id : 0,
-                    awayTeamName: awayTeam ? awayTeam.name : 'A Definir',
-                    awayTeamScore: pred.away
-                });
-            }
-        });
-
-        if (payload.length === 0) {
-            toast.error("Preencha pelo menos um palpite completo.");
-            setSubmitting(false);
-            return;
-        }
-
-        try {
-            const response = await fetch(API_ENDPOINTS.CREATE_PREDICTION, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                toast.success("Palpites salvos com sucesso!");
-                updateUser({ GameMake: true }); // Update user context locally
-            } else {
-                toast.error("Erro ao salvar palpites.");
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error("Erro de conexão.");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    // Group matches for display
-    const groupedMatches = useMemo(() => {
-        const groups = {
-            'Groups': [],
-            'Round of 32': [],
-            'Round of 16': [],
-            'Quarter-finals': [],
-            'Semi-finals': [],
-            'Final': [] // Includes 3rd Place
-        };
-
-        matches.forEach(match => {
-            // Stage Enum mapping:
-            // 0-2: Group
-            // 3: Round of 32
-            // 4: Round of 16
-            // 5: Quarter
-            // 6: Semi
-            // 7: 3rd Place
-            // 8: Final
-            if (match.stage <= 2) groups['Groups'].push(match);
-            else if (match.stage === 3) groups['Round of 32'].push(match);
-            else if (match.stage === 4) groups['Round of 16'].push(match);
-            else if (match.stage === 5) groups['Quarter-finals'].push(match);
-            else if (match.stage === 6) groups['Semi-finals'].push(match);
-            else groups['Final'].push(match);
-        });
-        return groups;
-    }, [matches]);
-
-    // Helper to check if a stage is complete (all matches have predictions)
-    const isStageComplete = (stageName) => {
-        const stageMatches = groupedMatches[stageName];
-        if (!stageMatches || stageMatches.length === 0) return false;
-
-        // Check if every match in the stage has a full prediction
-        return stageMatches.every(m => {
-            const pred = predictions[m.id];
-            return pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '';
-        });
-    };
-
-    // Determine unlocked tabs based on completion
-    // Groups -> Round of 32 -> Round of 16 -> Quarter -> Semi -> Final
-    const unlockedTabs = useMemo(() => {
-        const tabs = ['Groups'];
-        if (isStageComplete('Groups')) tabs.push('Round of 32');
-        if (isStageComplete('Groups') && isStageComplete('Round of 32')) tabs.push('Round of 16');
-        if (isStageComplete('Groups') && isStageComplete('Round of 32') && isStageComplete('Round of 16')) tabs.push('Quarter-finals');
-        if (isStageComplete('Groups') && isStageComplete('Round of 32') && isStageComplete('Round of 16') && isStageComplete('Quarter-finals')) tabs.push('Semi-finals');
-        if (isStageComplete('Groups') && isStageComplete('Round of 32') && isStageComplete('Round of 16') && isStageComplete('Quarter-finals') && isStageComplete('Semi-finals')) tabs.push('Final');
-        return tabs;
-    }, [predictions, groupedMatches]);
+    const {
+        matches,
+        loading,
+        submitting,
+        predictions,
+        activeTab,
+        simulatedTeams,
+        setActiveTab,
+        handleScoreChange,
+        handleBlur,
+        handleSubmit,
+        groupedMatches,
+        unlockedTabs,
+        isTournamentComplete
+    } = useGameMake();
 
     const renderMatch = (match) => {
         // Overlay simulated teams if original are missing
@@ -248,6 +72,7 @@ const GameMake = () => {
                                     }`}
                                 value={predictions[match.id]?.home ?? ''}
                                 onChange={(e) => handleScoreChange(match.id, 'home', e.target.value)}
+                                onBlur={(e) => handleBlur(match.id, 'home', e.target.value)}
                                 disabled={!homeTeam || !awayTeam}
                             />
                             <span className="text-gray-300 font-bold">×</span>
@@ -260,6 +85,7 @@ const GameMake = () => {
                                     }`}
                                 value={predictions[match.id]?.away ?? ''}
                                 onChange={(e) => handleScoreChange(match.id, 'away', e.target.value)}
+                                onBlur={(e) => handleBlur(match.id, 'away', e.target.value)}
                                 disabled={!homeTeam || !awayTeam}
                             />
                         </div>
@@ -280,15 +106,6 @@ const GameMake = () => {
             </div>
         );
     };
-
-    // Check if tournament is 100% complete (all matches predicted)
-    const isTournamentComplete = useMemo(() => {
-        if (matches.length === 0) return false;
-        return matches.every(m => {
-            const pred = predictions[m.id];
-            return pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '';
-        });
-    }, [matches, predictions]);
 
     if (loading) {
         return (

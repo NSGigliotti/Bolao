@@ -6,6 +6,8 @@ public interface IMachesRepository
    Task<List<TeamModel>> GetGroupsAsync();
    Task<List<MatchModel>> GetAllMatch();
    Task<MatchModel> GetMatchAsync(int id);
+   Task<TeamModel> GetTeamById (int? id);
+   Task UpdateTeam (TeamModel team);
    Task UpdatePredictionsRangeAsync (List<PredictionModel> predictions);
    Task<string> CreatePrediction(List<PredictionModel> predictions);
    Task<List<PredictionModel>> GetAllPedicitonById (Guid id);

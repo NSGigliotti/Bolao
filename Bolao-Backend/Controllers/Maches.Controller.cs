@@ -4,6 +4,7 @@ using Bolao.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Bolao.Interfaces;
+using Bolao.Models;
 
 [ApiController]
 [Route("Maches")]
@@ -62,6 +63,20 @@ public class MachesController : ControllerBase
         {
             List<UserRankPayloadDTOs> userRanks = await _machesService.GetAllRankUser();
             return Ok(userRanks);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("GetMachesByUserId")]
+    public async Task<IActionResult> GetMachesByUserId([FromBody] Guid id)
+    {
+        try
+        {
+            List<PredictionModel> userPredicitons = await _machesService.GetMachesByUserId(id);
+            return Ok(userPredicitons);
         }
         catch (Exception ex)
         {
