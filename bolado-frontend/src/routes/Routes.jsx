@@ -8,6 +8,7 @@ import GameMake from '../pages/gamemake/GameMake';
 import MyGame from '../pages/mygame/MyGame';
 import GrupsPage from '../pages/grups/Grups';
 import RankPage from '../pages/Rank/RankPage';
+import GamesPage from '../pages/games/Games';
 
 
 function AppRoutes() {
@@ -20,6 +21,7 @@ function AppRoutes() {
         <Route path='/mygame' element={<MyGame />} />
         <Route path='/grups' element={<GrupsPage />} />
         <Route path='/rank' element={<RankPage />} />
+        <Route path='/user-games/:userId' element={<GamesPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

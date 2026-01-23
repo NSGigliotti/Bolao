@@ -96,18 +96,18 @@ const GameMake = () => {
                                 <img src={awayTeam.flagUrl} alt={awayTeam.name} className="w-8 h-6 object-cover rounded shadow-sm" />
                             ) : (
                                 <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-300">?</div>
-                            )}
+                            )}                                                                                      
                             <span className="font-bold text-gray-800 text-sm md:text-base leading-tight">
                                 {awayTeam ? awayTeam.name : 'A Definir'}
                             </span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>                                                                      
         );
     };
 
-    if (loading) {
+    if (loading) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600" />

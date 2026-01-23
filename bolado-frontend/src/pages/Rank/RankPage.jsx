@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navibar';
 import { Trophy, Medal, User, Loader2, AlertCircle, Flashlight } from 'lucide-react';
 import { API_ENDPOINTS } from '../../services/api';
 
 const RankPage = () => {
+    const navigate = useNavigate();
     const [ranking, setRanking] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -88,6 +90,23 @@ const RankPage = () => {
                     </div>
 
 
+                    {/* Prize Pool Summary */}
+                    <div className="bg-indigo-600 rounded-2xl shadow-lg p-6 mb-8 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-indigo-500 p-3 rounded-xl">
+                                <Trophy className="text-yellow-300" size={32} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold">Distribuição de Prêmios</h2>
+                                <p className="text-indigo-100 text-sm">Regra: 1º (70%) | 2º (20%) | 3º (10%)</p>
+                            </div>
+                        </div>
+                        <div className="text-3xl font-black flex items-baseline gap-1">
+                            <span>100%</span>
+                            <span className="text-sm font-normal text-indigo-200">do prêmio</span>
+                        </div>
+                    </div>
+
                     {/* Ranking List */}
                     <div className="space-y-4">
                         {loading ? (
@@ -117,6 +136,9 @@ const RankPage = () => {
                         ) : (
                             <div className="space-y-4">
                                 {(() => {
+                                    const PRIZE_PERCENTAGES = [0.70, 0.20, 0.10];
+                                    const TOTAL_PRIZE_POOL = 1000; // Valor configurável do prêmio total
+
                                     const groups = [];
                                     ranking.forEach(user => {
                                         const lastGroup = groups[groups.length - 1];
@@ -132,7 +154,19 @@ const RankPage = () => {
                                         }
                                     });
 
-                                    return groups.map((group, gIndex) => (
+                                    // Calculate prizes using Dense Ranking (1, 1, 2, 3)
+                                    // Group 1 (1st score) gets PRIZE_PERCENTAGES[0] / count
+                                    // Group 2 (2nd score) gets PRIZE_PERCENTAGES[1] / count
+                                    // Group 3 (3rd score) gets PRIZE_PERCENTAGES[2] / count
+                                    const groupsWithPrizes = groups.map((group, index) => {
+                                        let prizePercentage = 0;
+                                        if (index < PRIZE_PERCENTAGES.length) {
+                                            prizePercentage = PRIZE_PERCENTAGES[index] / group.users.length;
+                                        }
+                                        return { ...group, prizePercentage };
+                                    });
+
+                                    return groupsWithPrizes.map((group, gIndex) => (
                                         <div
                                             key={gIndex}
                                             className={`rounded-2xl shadow-sm border p-6 flex flex-col sm:flex-row items-center gap-6 transition-all duration-300 ${getRowStyle(group.position, group.isLast)}`}
@@ -156,15 +190,22 @@ const RankPage = () => {
                                                                 }`}>
                                                                 {user.name.charAt(0).toUpperCase()}
                                                             </div>
-                                                            <div>
-                                                                <div className="text-sm font-bold text-gray-900 leading-tight">{user.name}</div>
-                                                                {(group.position <= 3 || group.isLast) && (
+                                                            <div className="flex-grow">
+                                                                <div
+                                                                    className="text-sm font-bold text-gray-900 leading-tight hover:text-indigo-600 cursor-pointer transition-colors inline-block"
+                                                                    onClick={() => navigate(`/user-games/${user.id}`, { state: { userName: user.name } })}
+                                                                >
+                                                                    {user.name}
+                                                                </div>
+                                                                {(group.prizePercentage > 0 || group.isLast) && (
                                                                     <div className={`text-[10px] font-medium flex items-center mt-0.5 uppercase tracking-tighter ${group.isLast && group.position > 3 ? 'text-blue-600' : 'text-gray-500'
                                                                         }`}>
-                                                                        {group.position === 1 ? '70%' :
-                                                                            group.position === 2 ? '20%' :
-                                                                                group.position === 3 ? '10%' :
-                                                                                    group.isLast ? 'Lanterna 🔦' : ''}
+                                                                        {group.prizePercentage > 0 ? (
+                                                                            <span className="text-green-600 font-bold">
+                                                                                Prêmio: {(group.prizePercentage * 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%
+                                                                                {group.users.length > 1 && <span className="text-[8px] ml-1 text-gray-400">(Dividido)</span>}
+                                                                            </span>
+                                                                        ) : group.isLast ? 'Lanterna 🔦' : ''}
                                                                     </div>
                                                                 )}
                                                             </div>

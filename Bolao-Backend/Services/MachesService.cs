@@ -82,7 +82,9 @@ public class MachesService : IMachesService
                  userId: id,
                  matchId: i.MatchId,
                  homeTeamScore: i.HomeTeamScore,
-                 awayTeamScore: i.AwayTeamScore
+                 awayTeamScore: i.AwayTeamScore,
+                 homeTeamId: i.IdHomeTeam,
+                 awayTeamId: i.IdAwayTeam
             );
             userBolao.Add(prediction);
         }

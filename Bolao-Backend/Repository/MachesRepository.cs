@@ -28,7 +28,16 @@ public class MachesRepository : IMachesRepository
 
     public async Task<List<PredictionModel>> GetAllPedicitonById(Guid id)
     {
-        var predictions = await _bolaoDbContext.Prediction.AsNoTracking().Include(x => x.Match).ThenInclude(m => m.HomeTeam).Include(x => x.Match).ThenInclude(m => m.AwayTeam).Where(x => x.UserId == id).ToListAsync();
+        var predictions = await _bolaoDbContext.Prediction
+            .AsNoTracking()
+            .Include(x => x.Match)
+                .ThenInclude(m => m.HomeTeam)
+            .Include(x => x.Match)
+                .ThenInclude(m => m.AwayTeam)
+            .Include(x => x.HomeTeam)
+            .Include(x => x.AwayTeam)
+            .Where(x => x.UserId == id)
+            .ToListAsync();
         return predictions;
     }
 
@@ -78,7 +87,7 @@ public class MachesRepository : IMachesRepository
 
     public async Task<List<UserModel>> GetAllRankUsers()
     {
-        List<UserModel> users = await _bolaoDbContext.Users.ToListAsync();
+        List<UserModel> users = await _bolaoDbContext.Users.Where(u => u.GameMake == true).ToListAsync();
         return users;
     }
 

@@ -71,10 +71,10 @@ const MyGame = () => {
                                     {/* Home */}
                                     <div className="flex-1 flex items-center justify-end gap-2 text-right">
                                         <span className="font-bold text-gray-800 text-sm leading-tight">
-                                            {match.homeTeam ? match.homeTeam.name : 'TBD'}
+                                            {match.homeTeam ? match.homeTeam.name : (pred.homeTeam ? pred.homeTeam.name : 'TBD')}
                                         </span>
-                                        {match.homeTeam && match.homeTeam.flagUrl ? (
-                                            <img src={match.homeTeam.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
+                                        {(match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl) ? (
+                                            <img src={match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
                                         ) : (
                                             <div className="w-6 h-4 bg-gray-100 rounded"></div>
                                         )}
@@ -89,13 +89,13 @@ const MyGame = () => {
 
                                     {/* Away */}
                                     <div className="flex-1 flex items-center justify-start gap-2 text-left">
-                                        {match.awayTeam && match.awayTeam.flagUrl ? (
-                                            <img src={match.awayTeam.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
+                                        {(match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl) ? (
+                                            <img src={match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
                                         ) : (
                                             <div className="w-6 h-4 bg-gray-100 rounded"></div>
                                         )}
                                         <span className="font-bold text-gray-800 text-sm leading-tight">
-                                            {match.awayTeam ? match.awayTeam.name : 'TBD'}
+                                            {match.awayTeam ? match.awayTeam.name : (pred.awayTeam ? pred.awayTeam.name : 'TBD')}
                                         </span>
                                     </div>
                                 </div>
