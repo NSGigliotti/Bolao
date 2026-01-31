@@ -318,10 +318,12 @@ const getLoser = (matchId, simulatedTeams, predictions) => {
     if (!match || !match.homeTeam || !match.awayTeam) return null;
 
     const pred = predictions[matchId];
-    if (pred && pred.homeScore !== undefined && pred.awayScore !== undefined) {
-        if (parseInt(pred.home) > parseInt(pred.away)) return match.awayTeam;
-        if (parseInt(pred.away) > parseInt(pred.home)) return match.homeTeam;
-        return match.awayTeam; // Default Away
+    if (pred && pred.home !== undefined && pred.away !== undefined) {
+        const hScore = parseInt(pred.home);
+        const aScore = parseInt(pred.away);
+        if (hScore > aScore) return match.awayTeam;
+        if (aScore > hScore) return match.homeTeam;
+        return match.awayTeam; // Default Away (loser in case of draw/penalties)
     }
     return null;
 };

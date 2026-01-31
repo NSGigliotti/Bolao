@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 export const useGameMake = () => {
     const navigate = useNavigate();
-    const { user, updateUser } = useAuthContext();
+    const { user, login, updateUser } = useAuthContext();
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -135,8 +135,13 @@ export const useGameMake = () => {
             });
 
             if (response.ok) {
+                const data = await response.json();
                 toast.success("Palpites salvos com sucesso!");
-                updateUser({ GameMake: true });
+                if (data.token) {
+                    login(data.token);
+                } else {
+                    updateUser({ GameMake: true });
+                }
                 navigate('/mygame');
             } else {
                 toast.error("Erro ao salvar palpites.");

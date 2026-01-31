@@ -13,6 +13,7 @@ const MatchCard = ({ match }) => {
         setAwayScore,
         loading,
         handleSave,
+        handleCancel,
         formatTime,
         getTeamAbbr,
         getFlag
@@ -28,7 +29,7 @@ const MatchCard = ({ match }) => {
         <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-2 relative group">
 
             {/* Admin Edit Button */}
-            {isAdmin && !isEditing && (
+            {isAdmin && !isEditing && match.homeTeam && match.awayTeam && (
                 <button
                     onClick={() => setIsEditing(true)}
                     className="absolute -top-2 -right-2 bg-blue-50 p-1.5 rounded-full text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm z-10 border border-blue-100"
@@ -72,22 +73,34 @@ const MatchCard = ({ match }) => {
                         <div className="flex items-center gap-2">
                             <input
                                 type="number"
+                                min="0"
                                 value={homeScore}
-                                onChange={(e) => setHomeScore(e.target.value)}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (!isNaN(val) && val >= 0) setHomeScore(val);
+                                    else if (e.target.value === "") setHomeScore("");
+                                }}
                                 className="w-8 h-8 text-center text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             />
                             <span className="text-gray-400 text-xs">x</span>
                             <input
                                 type="number"
+                                min="0"
                                 value={awayScore}
-                                onChange={(e) => setAwayScore(e.target.value)}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (!isNaN(val) && val >= 0) setAwayScore(val);
+                                    else if (e.target.value === "") setAwayScore("");
+                                }}
                                 className="w-8 h-8 text-center text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             />
                             <div className="flex gap-1 ml-2">
                                 <button onClick={handleSave} disabled={loading} className="text-green-600 hover:text-green-700">
                                     <Save size={16} />
                                 </button>
-                                <button onClick={() => setIsEditing(false)} className="text-red-500 hover:text-red-600">
+                                <button onClick={handleCancel} className="text-red-500 hover:text-red-600">
                                     <X size={16} />
                                 </button>
                             </div>

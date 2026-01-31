@@ -20,7 +20,6 @@ const Navbar = () => {
               <a href="/rank" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Ranking</a>
             </div>
             <div className="hidden md:ml-10 md:flex md:space-x-8">
-              <a href="/dashboard" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Dashboard</a>
               {user && (
                 hasGameMake ? (
                   <a href="/mygame" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
@@ -57,9 +56,9 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center space-x-4">
                 <a href="/auth" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Entrar</a>
-                <a href="/signup" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors">
+                {/* <a href="/signup" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors">
                   Começar agora
-                </a>
+                </a> */}
               </div>
             )}
           </div>
@@ -82,8 +81,6 @@ const Navbar = () => {
           <div className="pt-2 pb-3 space-y-1">
             <a href="/grups" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Grupos</a>
             <a href="/rank" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Ranking</a>
-            <a href="/dashboard" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Dashboard</a>
-            <a href="/projetos" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Projetos</a>
           </div>
 
           <div className="pt-4 pb-3 border-t border-gray-200">

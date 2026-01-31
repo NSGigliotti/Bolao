@@ -9,11 +9,13 @@ public class AdminService : IAdminService
 
     private readonly IUserRepository _userRepository;
     private readonly IMachesRepository _iMatchRepository;
+    private readonly MachesValidate _machesValidate;
 
-    public AdminService(IUserRepository userRepository, IMachesRepository machesRepository)
+    public AdminService(IUserRepository userRepository, IMachesRepository machesRepository, MachesValidate machesValidate)
     {
         _userRepository = userRepository;
         _iMatchRepository = machesRepository;
+        _machesValidate = machesValidate;
     }
 
     public async Task<string> PlaymentUpdate(PaymentUpdateDTOs payment)
@@ -52,6 +54,7 @@ public class AdminService : IAdminService
 
         bool isGroupStage = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2 || match.Stage == MatchStage.GroupStageRound3;
 
+        bool nextFaze = match.Stage == MatchStage.GroupStageRound1 || match.Stage == MatchStage.GroupStageRound2;
 
         if (isGroupStage)
         {
@@ -109,7 +112,7 @@ public class AdminService : IAdminService
         }
         else
         {
-            newWinnerId = null; 
+            newWinnerId = null;
             newPoints1 = 1;
             newPoints2 = 1;
         }
@@ -123,7 +126,7 @@ public class AdminService : IAdminService
         match.HomeTeamScore = resultUpdateDTOs.HomeTeamScore;
         match.AwayTeamScore = resultUpdateDTOs.AwayTeamScore;
         match.WinnerId = newWinnerId;
-        match.Status = MatchStatus.Finished; 
+        match.Status = MatchStatus.Finished;
 
         foreach (var prediction in predictions)
         {
@@ -152,7 +155,7 @@ public class AdminService : IAdminService
                     earnedPoints = 1;
                 }
             }
-            else 
+            else
             {
                 bool correctTeams = prediction.HomeTeamId == match.HomeTeamId && prediction.AwayTeamId == match.AwayTeamId;
                 if (correctTeams)
@@ -252,11 +255,17 @@ public class AdminService : IAdminService
             }
         }
 
+
+
+
         await _iMatchRepository.UpdateTeam(team1);
         await _iMatchRepository.UpdateTeam(team2);
         await _iMatchRepository.UpdateMatchAsync(match);
         await _iMatchRepository.UpdatePredictionsRangeAsync(predictions);
         await _userRepository.UpdateAllUsers(users);
+        await _machesValidate.UpdateKnockoutBracket(_iMatchRepository);
+
+
 
         return "ok";
     }

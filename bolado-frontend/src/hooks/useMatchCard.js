@@ -40,8 +40,8 @@ export const useMatchCard = (match) => {
                 },
                 body: JSON.stringify({
                     machID: match.id || match.Id,
-                    homeTeamScore: parseInt(homeScore),
-                    awayTeamScore: parseInt(awayScore)
+                    homeTeamScore: parseInt(homeScore) || 0,
+                    awayTeamScore: parseInt(awayScore) || 0
                 })
             });
 
@@ -64,6 +64,12 @@ export const useMatchCard = (match) => {
         }
     };
 
+    const handleCancel = () => {
+        setHomeScore(match.homeTeamScore ?? 0);
+        setAwayScore(match.awayTeamScore ?? 0);
+        setIsEditing(false);
+    };
+
     return {
         isAdmin,
         isEditing,
@@ -74,6 +80,7 @@ export const useMatchCard = (match) => {
         setAwayScore,
         loading,
         handleSave,
+        handleCancel,
         formatTime,
         getTeamAbbr,
         getFlag

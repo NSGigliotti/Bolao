@@ -1,10 +1,36 @@
 import React from 'react';
 import Navbar from '../../components/common/Navibar';
-import { Loader2, Printer, Calendar } from 'lucide-react';
+import { Loader2, Printer, Calendar, CheckCircle } from 'lucide-react';
 import { useMyGame } from '../../hooks/useMyGame';
 
 const MyGame = () => {
     const { user, predictions, loading, handlePrint } = useMyGame();
+
+    const getStageName = (stage) => {
+        const stages = {
+            0: "1ª Rodada (Fase de Grupos)",
+            1: "2ª Rodada (Fase de Grupos)",
+            2: "3ª Rodada (Fase de Grupos)",
+            3: "32-avos de Final",
+            4: "Oitavas de Final",
+            5: "Quartas de Final",
+            6: "Semifinais",
+            7: "Terceiro Lugar",
+            8: "Final"
+        };
+        return stages[stage] || "Outros";
+    };
+
+    const groupedPredictions = (predictions || []).reduce((groups, pred) => {
+        const stage = pred.match?.stage ?? 'unknown';
+        if (!groups[stage]) {
+            groups[stage] = [];
+        }
+        groups[stage].push(pred);
+        return groups;
+    }, {});
+
+    const sortedStages = Object.keys(groupedPredictions).sort((a, b) => Number(a) - Number(b));
 
     if (loading) {
         return (
@@ -53,68 +79,121 @@ const MyGame = () => {
                     <p className="text-sm text-gray-500">{new Date().toLocaleDateString()}</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2 print:gap-4 text-sm">
-                    {predictions.map((pred) => {
-                        const match = pred.match;
-                        if (!match) return null;
-
-                        return (
-                            <div key={pred.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm print:shadow-none print:border-gray-300 break-inside-avoid">
-                                <div className="text-xs text-gray-400 font-medium mb-3 flex items-center gap-1">
-                                    <Calendar size={12} />
-                                    {new Date(match.matchDate).toLocaleDateString()}
-                                    <span className="mx-1">•</span>
-                                    {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {!predictions || predictions.length === 0 ? (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 py-20 text-center">
+                        <p className="text-gray-500 font-medium">Nenhum palpite encontrado.</p>
+                        <p className="text-gray-400 text-sm mt-1">Você ainda não salvou seu jogo.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-10 print:space-y-4">
+                        {sortedStages.map((stageKey) => (
+                            <div key={stageKey} className="space-y-4 print:space-y-2">
+                                {/* Stage Header */}
+                                <div className="flex items-center gap-3">
+                                    <h2 className="text-lg font-black text-blue-900 uppercase tracking-wider">
+                                        {getStageName(Number(stageKey))}
+                                    </h2>
+                                    <div className="flex-grow h-px bg-blue-100"></div>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-2">
-                                    {/* Home */}
-                                    <div className="flex-1 flex items-center justify-end gap-2 text-right">
-                                        <span className="font-bold text-gray-800 text-sm leading-tight">
-                                            {match.homeTeam ? match.homeTeam.name : (pred.homeTeam ? pred.homeTeam.name : 'TBD')}
-                                        </span>
-                                        {(match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl) ? (
-                                            <img src={match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                        ) : (
-                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                        )}
-                                    </div>
+                                {/* Web View - Cards Layout (Hidden in Print) */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden text-sm">
+                                    {groupedPredictions[stageKey].map((pred) => {
+                                        const match = pred.match;
+                                        if (!match) return null;
 
-                                    {/* Score */}
-                                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded border border-gray-100 print:border-gray-300">
-                                        <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.homeTeamScore}</span>
-                                        <span className="text-gray-400 text-xs">x</span>
-                                        <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.awayTeamScore}</span>
-                                    </div>
+                                        return (
+                                            <div key={pred.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:border-blue-200 transition-colors">
+                                                <div className="text-xs text-gray-400 font-medium mb-3 flex items-center gap-1">
+                                                    <Calendar size={12} />
+                                                    {new Date(match.matchDate).toLocaleDateString()}
+                                                    <span className="mx-1">•</span>
+                                                    {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {pred.pointsGained > 0 && (
+                                                        <span className="ml-auto bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
+                                                            <CheckCircle size={10} />
+                                                            +{pred.pointsGained} pts
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                    {/* Away */}
-                                    <div className="flex-1 flex items-center justify-start gap-2 text-left">
-                                        {(match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl) ? (
-                                            <img src={match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                        ) : (
-                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                        )}
-                                        <span className="font-bold text-gray-800 text-sm leading-tight">
-                                            {match.awayTeam ? match.awayTeam.name : (pred.awayTeam ? pred.awayTeam.name : 'TBD')}
-                                        </span>
-                                    </div>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    {/* Home */}
+                                                    <div className="flex-1 flex items-center justify-end gap-2 text-right">
+                                                        <span className="font-bold text-gray-800 text-sm leading-tight">
+                                                            {match.homeTeam ? match.homeTeam.name : (pred.homeTeam ? pred.homeTeam.name : 'TBD')}
+                                                        </span>
+                                                        {(match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl) ? (
+                                                            <img src={match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
+                                                        ) : (
+                                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Score */}
+                                                    <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                                                        <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.homeTeamScore}</span>
+                                                        <span className="text-gray-400 text-xs">x</span>
+                                                        <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.awayTeamScore}</span>
+                                                    </div>
+
+                                                    {/* Away */}
+                                                    <div className="flex-1 flex items-center justify-start gap-2 text-left">
+                                                        {(match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl) ? (
+                                                            <img src={match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
+                                                        ) : (
+                                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
+                                                        )}
+                                                        <span className="font-bold text-gray-800 text-sm leading-tight">
+                                                            {match.awayTeam ? match.awayTeam.name : (pred.awayTeam ? pred.awayTeam.name : 'TBD')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Real Score Badge (if match finished) */}
+                                                {match.status === 2 && (
+                                                    <div className="mt-3 pt-3 border-t border-gray-50 flex justify-center items-center gap-2 text-[10px] text-gray-400 font-medium italic">
+                                                        Placar real: {match.homeTeamScore} - {match.awayTeamScore}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Optimized Print View - Compact List (Only visible in Print) */}
+                                <div className="hidden print:grid print:grid-cols-2 lg:print:grid-cols-3 print:gap-x-6 print:gap-y-0 text-[8px] leading-tight">
+                                    {groupedPredictions[stageKey].map((pred) => {
+                                        const match = pred.match;
+                                        const homeName = match?.homeTeam?.name || pred.homeTeam?.name || 'TBD';
+                                        const awayName = match?.awayTeam?.name || pred.awayTeam?.name || 'TBD';
+                                        return (
+                                            <div key={pred.id} className="flex items-center justify-between border-b border-gray-100 py-0.5 overflow-hidden">
+                                                <span className="truncate w-[40%] text-right pr-1 font-medium">{homeName}</span>
+                                                <span className={`w-[20%] text-center font-bold border-x border-gray-100 px-1 mx-1 ${pred.pointsGained > 0 ? 'bg-green-50 text-green-700' : 'bg-gray-50'}`}>
+                                                    {pred.homeTeamScore} x {pred.awayTeamScore}
+                                                </span>
+                                                <span className="truncate w-[40%] text-left pl-1 font-medium">{awayName}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Signature Field - Only visible in Print */}
-                <div className="hidden print:block mt-12 pt-8 border-t-2 border-gray-300 break-inside-avoid">
+                <div className="hidden print:block mt-6 pt-4 border-t border-gray-400 break-inside-avoid">
                     <div className="flex justify-between items-end">
-                        <div className="text-sm text-gray-500">
+                        <div className="text-[10px] text-gray-600">
                             <p>Data de emissão: {new Date().toLocaleString()}</p>
-                            <p>Sistema de Bolão</p>
+                            <p>Sistema de Bolão - {predictions.length} palpites registrados</p>
                         </div>
                         <div className="text-center">
-                            <div className="w-64 h-px bg-black mb-2"></div>
-                            <p className="font-medium text-gray-900">Assinatura do Participante</p>
-                            <p className="text-sm text-gray-500">{user?.name}</p>
+                            <div className="w-48 h-px bg-black mb-1"></div>
+                            <p className="font-semibold text-[10px] text-gray-900">Assinatura do Participante</p>
+                            <p className="text-[10px] text-gray-600">{user?.name}</p>
                         </div>
                     </div>
                 </div>

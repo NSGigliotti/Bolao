@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../contexts/AuthContext';
 import Navbar from '../../components/common/Navibar';
 import { Trophy, Medal, User, Loader2, AlertCircle, Flashlight } from 'lucide-react';
 import { API_ENDPOINTS } from '../../services/api';
 
 const RankPage = () => {
     const navigate = useNavigate();
+    const { user: currentUser } = useAuthContext();
     const [ranking, setRanking] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -193,7 +195,10 @@ const RankPage = () => {
                                                             <div className="flex-grow">
                                                                 <div
                                                                     className="text-sm font-bold text-gray-900 leading-tight hover:text-indigo-600 cursor-pointer transition-colors inline-block"
-                                                                    onClick={() => navigate(`/user-games/${user.id}`, { state: { userName: user.name } })}
+                                                                    onClick={() => {
+                                                                        const isCurrentUser = currentUser && (currentUser.id === user.id);
+                                                                        navigate(isCurrentUser ? '/mygame' : `/user-games/${user.id}`, { state: { userName: user.name } });
+                                                                    }}
                                                                 >
                                                                     {user.name}
                                                                 </div>

@@ -27,9 +27,8 @@ public class BolaoDbContext : DbContext
 
         modelBuilder.Entity<MatchModel>(entity =>
         {
-            entity.HasOne(m => m.HomeTeam).WithMany().HasForeignKey(m => m.HomeTeamId).OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(m => m.AwayTeam).WithMany().HasForeignKey(m => m.AwayTeamId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(m => m.HomeTeam).WithMany().HasForeignKey(m => m.HomeTeamId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
+            entity.HasOne(m => m.AwayTeam).WithMany().HasForeignKey(m => m.AwayTeamId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
 
             entity.HasOne(m => m.Winner).WithMany().HasForeignKey(m => m.WinnerId).IsRequired(false);
         });

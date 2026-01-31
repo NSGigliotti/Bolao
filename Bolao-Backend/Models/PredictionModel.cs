@@ -12,13 +12,13 @@ public class PredictionModel
     public int MatchId { get; set; }
     public virtual MatchModel Match { get; set; } = null!;
 
-    public int HomeTeamId { get; set; }
+    public int? HomeTeamId { get; set; }
     [System.ComponentModel.DataAnnotations.Schema.ForeignKey("HomeTeamId")]
     public virtual TeamModel? HomeTeam { get; set; }
 
     public int HomeTeamScore { get; set; }
 
-    public int AwayTeamId { get; set; }
+    public int? AwayTeamId { get; set; }
     [System.ComponentModel.DataAnnotations.Schema.ForeignKey("AwayTeamId")]
     public virtual TeamModel? AwayTeam { get; set; }
 
@@ -27,7 +27,7 @@ public class PredictionModel
 
     public PredictionModel() { }
 
-    public PredictionModel(Guid userId, int matchId, int homeTeamScore, int awayTeamScore, int homeTeamId, int awayTeamId)
+    public PredictionModel(Guid userId, int matchId, int homeTeamScore, int awayTeamScore, int? homeTeamId, int? awayTeamId)
     {
         Id = Guid.NewGuid();
         UserId = userId;
