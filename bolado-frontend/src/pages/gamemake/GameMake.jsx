@@ -62,32 +62,43 @@ const GameMake = () => {
                         </div>
 
                         {/* Score */}
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="number"
-                                min="0"
-                                className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
-                                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                                    }`}
-                                value={predictions[match.id]?.home ?? ''}
-                                onChange={(e) => handleScoreChange(match.id, 'home', e.target.value)}
-                                onBlur={(e) => handleBlur(match.id, 'home', e.target.value)}
-                                disabled={!homeTeam || !awayTeam}
-                            />
-                            <span className="text-gray-300 font-bold">×</span>
-                            <input
-                                type="number"
-                                min="0"
-                                className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
-                                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                                    : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                                    }`}
-                                value={predictions[match.id]?.away ?? ''}
-                                onChange={(e) => handleScoreChange(match.id, 'away', e.target.value)}
-                                onBlur={(e) => handleBlur(match.id, 'away', e.target.value)}
-                                disabled={!homeTeam || !awayTeam}
-                            />
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
+                                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                                        : (match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
+                                            ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
+                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                                        }`}
+                                    value={predictions[match.id]?.home ?? ''}
+                                    onChange={(e) => handleScoreChange(match.id, 'home', e.target.value)}
+                                    onBlur={(e) => handleBlur(match.id, 'home', e.target.value)}
+                                    disabled={!homeTeam || !awayTeam}
+                                />
+                                <span className="text-gray-300 font-bold">×</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
+                                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                                        : (match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
+                                            ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
+                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                                        }`}
+                                    value={predictions[match.id]?.away ?? ''}
+                                    onChange={(e) => handleScoreChange(match.id, 'away', e.target.value)}
+                                    onBlur={(e) => handleBlur(match.id, 'away', e.target.value)}
+                                    disabled={!homeTeam || !awayTeam}
+                                />
+                            </div>
+                            {match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined && (
+                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight flex items-center gap-1">
+                                    <AlertCircle size={10} /> Empate não permitido
+                                </span>
+                            )}
                         </div>
 
                         {/* Away */}
@@ -96,18 +107,18 @@ const GameMake = () => {
                                 <img src={awayTeam.flagUrl} alt={awayTeam.name} className="w-8 h-6 object-cover rounded shadow-sm" />
                             ) : (
                                 <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-300">?</div>
-                            )}                                                                                      
+                            )}
                             <span className="font-bold text-gray-800 text-sm md:text-base leading-tight">
                                 {awayTeam ? awayTeam.name : 'A Definir'}
                             </span>
                         </div>
                     </div>
                 </div>
-            </div>                                                                      
+            </div>
         );
     };
 
-    if (loading) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
@@ -165,14 +176,27 @@ const GameMake = () => {
                 </div>
 
                 {/* Match List */}
-                <div className="space-y-4">
-                    {activeTab === 'Groups' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* We could group by Group A, B, C here too if we wanted */}
-                            {groupedMatches['Groups'].map(match => renderMatch(match))}
-                        </div>
-                    )}
-                    {activeTab !== 'Groups' && (
+                <div className="space-y-8">
+                    {activeTab === 'Groups' ? (
+                        [0, 1, 2].map(stage => {
+                            const stageMatches = groupedMatches['Groups'].filter(m => m.stage === stage);
+                            if (stageMatches.length === 0) return null;
+
+                            return (
+                                <div key={stage} className="space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <h2 className="text-lg font-bold text-gray-700 uppercase tracking-wider">
+                                            {stage + 1}ª Rodada
+                                        </h2>
+                                        <div className="flex-grow h-px bg-gray-200"></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {stageMatches.map(match => renderMatch(match))}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {groupedMatches[activeTab].length > 0 ? (
                                 groupedMatches[activeTab].map(match => renderMatch(match))
@@ -181,6 +205,32 @@ const GameMake = () => {
                                     Nenhum jogo nesta fase ainda.
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Next Stage Button */}
+                    {activeTab !== 'Final' && (
+                        <div className="flex justify-center pt-8 pb-12">
+                            <button
+                                onClick={() => {
+                                    const currentIndex = tabs.indexOf(activeTab);
+                                    if (currentIndex < tabs.length - 1) {
+                                        const nextTab = tabs[currentIndex + 1];
+                                        if (unlockedTabs.includes(nextTab)) {
+                                            setActiveTab(nextTab);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }
+                                    }
+                                }}
+                                disabled={!unlockedTabs.includes(tabs[tabs.indexOf(activeTab) + 1])}
+                                className={`flex items-center gap-2 px-8 py-4 font-bold rounded-2xl shadow-xl transition-all active:scale-95 ${!unlockedTabs.includes(tabs[tabs.indexOf(activeTab) + 1])
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-200'
+                                    }`}
+                            >
+                                Próxima Etapa
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
                         </div>
                     )}
                 </div>

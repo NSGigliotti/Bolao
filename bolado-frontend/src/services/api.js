@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'https://fifty-hounds-win.loca.lt';
+//const BASE_URL = 'http://localhost:8080';
 
 export const API_ENDPOINTS = {
     LOGIN: `${BASE_URL}/User/Login`,

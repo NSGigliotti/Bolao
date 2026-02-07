@@ -99,9 +99,15 @@ export const useGameMake = () => {
         const token = localStorage.getItem('token');
         const payload = [];
 
-        matches.forEach(match => {
+        for (const match of matches) {
             const pred = predictions[match.id];
             if (pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '') {
+                if (match.stage >= 3 && pred.home === pred.away) {
+                    toast.error(`Empates não são permitidos em fases de mata-mata (${match.id})`);
+                    setSubmitting(false);
+                    return;
+                }
+
                 const sim = simulatedTeams[match.id];
                 const homeTeam = match.homeTeam || (sim ? sim.homeTeam : null);
                 const awayTeam = match.awayTeam || (sim ? sim.awayTeam : null);
@@ -116,7 +122,7 @@ export const useGameMake = () => {
                     awayTeamScore: pred.away
                 });
             }
-        });
+        }
 
         if (payload.length === 0) {
             toast.error("Preencha pelo menos um palpite completo.");
@@ -128,6 +134,7 @@ export const useGameMake = () => {
             const response = await fetch(API_ENDPOINTS.CREATE_PREDICTION, {
                 method: 'POST',
                 headers: {
+                    'bypass-tunnel-reminder': 'true',
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -199,9 +206,17 @@ export const useGameMake = () => {
         if (matches.length === 0) return false;
         return matches.every(m => {
             const pred = predictions[m.id];
-            return pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '';
+            const sim = simulatedTeams[m.id];
+            const homeTeam = m.homeTeam || (sim ? sim.homeTeam : null);
+            const awayTeam = m.awayTeam || (sim ? sim.awayTeam : null);
+
+            return pred &&
+                pred.home !== undefined && pred.home !== '' &&
+                pred.away !== undefined && pred.away !== '' &&
+                homeTeam && awayTeam &&
+                (m.stage < 3 || pred.home !== pred.away); // No draws in knockout stages
         });
-    }, [matches, predictions]);
+    }, [matches, predictions, simulatedTeams]);
 
     return {
         matches,

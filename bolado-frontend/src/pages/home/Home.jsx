@@ -30,7 +30,7 @@ const HomePage = () => {
                 ) : error ? (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl flex items-center gap-3">
                         <AlertCircle />
-                        <span>Não foi possível conectar ao servidor (localhost:8080). Verifique se o backend está rodando.</span>
+                        <span>Não foi possível conectar ao servidor. Verifique se o backend está rodando.</span>
                     </div>
                 ) : (
                     <div className="space-y-10">

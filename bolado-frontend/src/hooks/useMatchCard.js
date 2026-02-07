@@ -35,6 +35,7 @@ export const useMatchCard = (match) => {
             const response = await fetch(API_ENDPOINTS.UPDATE_RESULT, {
                 method: 'POST',
                 headers: {
+                    'bypass-tunnel-reminder': 'true',
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },

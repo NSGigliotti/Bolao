@@ -47,6 +47,7 @@ const GamesPage = () => {
                 const response = await fetch(API_ENDPOINTS.GET_MATCHES_BY_USER, {
                     method: 'POST',
                     headers: {
+                        'bypass-tunnel-reminder': 'true',
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(userId)

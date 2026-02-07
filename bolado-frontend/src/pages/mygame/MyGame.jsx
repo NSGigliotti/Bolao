@@ -54,11 +54,27 @@ const MyGame = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col print:bg-white print:min-h-0">
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 0.5cm;
+                    }
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .print-container {
+                        display: block !important;
+                    }
+                }
+            `}} />
             <div className="print:hidden">
                 <Navbar />
             </div>
 
-            <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 pt-24 print:pt-4 print:px-0 print:max-w-none">
+            <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 pt-24 print:pt-0 print:px-0 print:max-w-none">
                 <div className="flex items-center justify-between mb-8 print:hidden">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Meu Jogo</h1>
@@ -73,10 +89,13 @@ const MyGame = () => {
                     </button>
                 </div>
 
-                <div className="hidden print:block mb-6 text-center border-b pb-4">
-                    <h1 className="text-2xl font-bold text-gray-900">Bolão - Meus Palpites</h1>
-                    <p className="text-gray-600">Participante: <span className="font-semibold">{user?.name}</span></p>
-                    <p className="text-sm text-gray-500">{new Date().toLocaleDateString()}</p>
+                <div className="hidden print:block mb-3 text-center border-b pb-2">
+                    <h1 className="text-xl font-bold text-gray-900 leading-tight">Bolão - Meus Palpites</h1>
+                    <div className="flex justify-center gap-4 text-[9px] text-gray-600 mt-0.5">
+                        <p>Participante: <span className="font-semibold text-gray-900">{user?.name}</span></p>
+                        <p>Total: <span className="font-semibold text-gray-900">{predictions.length} palpites</span></p>
+                        <p>{new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
                 </div>
 
                 {!predictions || predictions.length === 0 ? (
@@ -85,12 +104,12 @@ const MyGame = () => {
                         <p className="text-gray-400 text-sm mt-1">Você ainda não salvou seu jogo.</p>
                     </div>
                 ) : (
-                    <div className="space-y-10 print:space-y-4">
+                    <div className="space-y-10 print:space-y-2">
                         {sortedStages.map((stageKey) => (
-                            <div key={stageKey} className="space-y-4 print:space-y-2">
+                            <div key={stageKey} className="space-y-4 print:space-y-1">
                                 {/* Stage Header */}
-                                <div className="flex items-center gap-3">
-                                    <h2 className="text-lg font-black text-blue-900 uppercase tracking-wider">
+                                <div className="flex items-center gap-3 print:gap-1.5">
+                                    <h2 className="text-lg font-black text-blue-900 uppercase tracking-wider print:text-[8px] print:tracking-normal">
                                         {getStageName(Number(stageKey))}
                                     </h2>
                                     <div className="flex-grow h-px bg-blue-100"></div>
@@ -162,18 +181,18 @@ const MyGame = () => {
                                 </div>
 
                                 {/* Optimized Print View - Compact List (Only visible in Print) */}
-                                <div className="hidden print:grid print:grid-cols-2 lg:print:grid-cols-3 print:gap-x-6 print:gap-y-0 text-[8px] leading-tight">
+                                <div className="hidden print:grid print:grid-cols-3 print:gap-x-4 print:gap-y-0 text-[7px] leading-[1.1]">
                                     {groupedPredictions[stageKey].map((pred) => {
                                         const match = pred.match;
                                         const homeName = match?.homeTeam?.name || pred.homeTeam?.name || 'TBD';
                                         const awayName = match?.awayTeam?.name || pred.awayTeam?.name || 'TBD';
                                         return (
-                                            <div key={pred.id} className="flex items-center justify-between border-b border-gray-100 py-0.5 overflow-hidden">
-                                                <span className="truncate w-[40%] text-right pr-1 font-medium">{homeName}</span>
-                                                <span className={`w-[20%] text-center font-bold border-x border-gray-100 px-1 mx-1 ${pred.pointsGained > 0 ? 'bg-green-50 text-green-700' : 'bg-gray-50'}`}>
-                                                    {pred.homeTeamScore} x {pred.awayTeamScore}
-                                                </span>
-                                                <span className="truncate w-[40%] text-left pl-1 font-medium">{awayName}</span>
+                                            <div key={pred.id} className="flex items-center justify-between border-b border-gray-100 py-0.2 px-1 hover:bg-gray-50 transition-colors h-4 overflow-hidden">
+                                                <span className="truncate w-[40%] text-right pr-1 font-medium text-gray-700">{homeName}</span>
+                                                <div className={`w-[20%] text-center font-bold border-x border-gray-100 px-0.5 whitespace-nowrap ${pred.pointsGained > 0 ? 'bg-green-50 text-green-700' : 'bg-gray-50'}`}>
+                                                    {pred.homeTeamScore} <span className="font-normal opacity-50 text-[6px]">x</span> {pred.awayTeamScore}
+                                                </div>
+                                                <span className="truncate w-[40%] text-left pl-1 font-medium text-gray-700">{awayName}</span>
                                             </div>
                                         );
                                     })}
@@ -184,16 +203,15 @@ const MyGame = () => {
                 )}
 
                 {/* Signature Field - Only visible in Print */}
-                <div className="hidden print:block mt-6 pt-4 border-t border-gray-400 break-inside-avoid">
-                    <div className="flex justify-between items-end">
-                        <div className="text-[10px] text-gray-600">
-                            <p>Data de emissão: {new Date().toLocaleString()}</p>
-                            <p>Sistema de Bolão - {predictions.length} palpites registrados</p>
+                <div className="hidden print:block mt-4 pt-2 border-t border-gray-300 break-inside-avoid">
+                    <div className="flex justify-between items-end px-2">
+                        <div className="text-[7px] text-gray-500 italic">
+                            Gerado em {new Date().toLocaleString()} • Bolão Web App
                         </div>
-                        <div className="text-center">
-                            <div className="w-48 h-px bg-black mb-1"></div>
-                            <p className="font-semibold text-[10px] text-gray-900">Assinatura do Participante</p>
-                            <p className="text-[10px] text-gray-600">{user?.name}</p>
+                        <div className="text-center relative">
+                            <div className="w-32 h-px bg-gray-400 mb-1"></div>
+                            <p className="font-bold text-[8px] text-gray-900 uppercase tracking-tighter">Assinatura</p>
+                            <p className="text-[7px] text-gray-600">{user?.name}</p>
                         </div>
                     </div>
                 </div>

@@ -72,11 +72,18 @@ public class MachesService : IMachesService
 
         List<PredictionModel> userBolao = [];
 
+        var allMatches = await _machesRepository.GetAllMatch();
+        var matchesDict = allMatches.ToDictionary(m => m.Id);
+
         foreach (var i in makePredictionDTOs)
         {
-            if (i.MatchId == null) throw new Exception("Id da partida invalido");
-
-            if (i.HomeTeamScore == null || i.AwayTeamScore == null) throw new Exception("");
+            if (matchesDict.TryGetValue(i.MatchId, out var match))
+            {
+                if (match.Stage >= Bolao.Enum.MatchStage.RoundOf32 && i.HomeTeamScore == i.AwayTeamScore)
+                {
+                    throw new Exception($"Empates não são permitidos em fases de mata-mata ({match.Id})");
+                }
+            }
 
             PredictionModel prediction = new PredictionModel(
                  userId: id,

@@ -45,9 +45,9 @@ public class MachesController : ControllerBase
 
         try
         {
-            await _machesService.CreatePrediction(makePredictionDTOs, id);
+            var result = await _machesService.CreatePrediction(makePredictionDTOs, id);
 
-            return Ok(new { Id = userId });
+            return Ok(result);
         }
         catch (Exception ex)
         {

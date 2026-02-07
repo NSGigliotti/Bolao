@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, X, LogOut } from 'lucide-react';
 import { useNavbar } from '../../hooks/useNavbar';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const { user, isMobileMenuOpen, setIsMobileMenuOpen, handleLogout, hasGameMake, navigate } = useNavbar();
@@ -16,20 +17,14 @@ const Navbar = () => {
               <span className="ml-2 text-xl font-bold text-gray-900">Bolao</span>
             </div>
             <div className="ml-6 flex items-center">
-              <a href="/grups" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Grupos</a>
-              <a href="/rank" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Ranking</a>
+              <Link to="/grups" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Grupos</Link>
+              <Link to="/rank" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Ranking</Link>
             </div>
             <div className="hidden md:ml-10 md:flex md:space-x-8">
               {user && (
-                hasGameMake ? (
-                  <a href="/mygame" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
-                    Meu Jogo
-                  </a>
-                ) : (
-                  <a href="/gamemake" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
-                    Fazer Jogo
-                  </a>
-                )
+                <Link to="/mygame" className="text-blue-600 hover:text-blue-700 font-semibold px-3 py-2 text-sm bg-blue-50 rounded-lg transition-colors">
+                  Meu Jogo
+                </Link>
               )}
             </div>
           </div>
@@ -55,10 +50,10 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <a href="/auth" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Entrar</a>
-                {/* <a href="/signup" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors">
+                <Link to="/auth" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Entrar</Link>
+                {/* <Link to="/signup" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors">
                   Começar agora
-                </a> */}
+                </Link> */}
               </div>
             )}
           </div>
@@ -79,8 +74,11 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="pt-2 pb-3 space-y-1">
-            <a href="/grups" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Grupos</a>
-            <a href="/rank" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Ranking</a>
+            <Link to="/grups" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Grupos</Link>
+            <Link to="/rank" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Ranking</Link>
+            {user && (
+              <Link to="/mygame" className="block px-4 py-2 text-base font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors rounded-md mx-4">Meu Jogo</Link>
+            )}
           </div>
 
           <div className="pt-4 pb-3 border-t border-gray-200">
@@ -101,8 +99,8 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="px-4 space-y-2">
-                <a href="/auth" className="block w-full text-center px-4 py-2 text-base font-medium text-gray-700">Entrar</a>
-                <a href="/signup" className="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-md text-base font-medium">Cadastrar</a>
+                <Link to="/auth" className="block w-full text-center px-4 py-2 text-base font-medium text-gray-700">Entrar</Link>
+                <Link to="/signup" className="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-md text-base font-medium">Cadastrar</Link>
               </div>
             )}
           </div>

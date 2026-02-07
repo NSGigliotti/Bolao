@@ -20,14 +20,23 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-        });
+
+    //  options.AddPolicy("AllowFrontend",
+    //     builder =>
+    //     {
+    //         builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
+    //                .AllowAnyHeader()
+    //                .AllowAnyMethod();
+    //     });
+    options.AddPolicy("LocalTunnelPolicy", policy =>
+    {
+        policy.AllowAnyOrigin() 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithExposedHeaders("bypass-tunnel-reminder"); 
+    });
 });
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Bolao API", Version = "v1" });
@@ -83,7 +92,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options => 
+.AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -94,32 +103,32 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JWT_ISSUER"] ?? "DefaultIssuer",
         ValidAudience = builder.Configuration["JWT_AUDIENCE"] ?? "DefaultAudience",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET_KEY"])),
-        ClockSkew = TimeSpan.Zero 
+        ClockSkew = TimeSpan.Zero
     };
 
     options.Events = new JwtBearerEvents
-{
-    OnForbidden = context =>
     {
-        context.Response.StatusCode = 403;
-        context.Response.ContentType = "application/json";
-        return context.Response.WriteAsync("{\"error\": \"Acesso negado: Você não tem permissão de Administrador.\"}");
-    }
-};
+        OnForbidden = context =>
+        {
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+            return context.Response.WriteAsync("{\"error\": \"Acesso negado: Você não tem permissão de Administrador.\"}");
+        }
+    };
 
-    options.RequireHttpsMetadata = false; //! definir como true em produção
+    options.RequireHttpsMetadata = true; //! definir como true em produção
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        
+
         ValidateIssuer = true,
         ValidIssuer = jwtIssuer,
-        
+
         ValidateAudience = true,
         ValidAudience = jwtAudience,
-        
+
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
 
@@ -130,15 +139,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<BolaoDbContext>(options =>
 {
-   options.UseMySql(
-        connectionString,
-        new MySqlServerVersion(new Version(8, 0, 36)), 
-        mysqlOptions => 
-        {
-            mysqlOptions.EnableRetryOnFailure();
-        }
-    );
-    
+    options.UseMySql(
+         connectionString,
+         new MySqlServerVersion(new Version(8, 0, 36)),
+         mysqlOptions =>
+         {
+             mysqlOptions.EnableRetryOnFailure();
+         }
+     );
+
 });
 
 var app = builder.Build();
@@ -148,7 +157,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
     var db = services.GetRequiredService<BolaoDbContext>();
-    
+
     // Wait for DB to be ready
     var dbReady = false;
     var dbRetries = 20;
@@ -216,10 +225,10 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.UseCors("AllowFrontend");
+app.UseCors("LocalTunnelPolicy");
 
-app.UseAuthentication(); 
-app.UseAuthorization();  
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
