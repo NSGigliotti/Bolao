@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bolao_Backend.Migrations
 {
     [DbContext(typeof(BolaoDbContext))]
-    [Migration("20260112200450_InitialCreate")]
+    [Migration("20260211203119_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,13 +33,13 @@ namespace Bolao_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AwayTeamId")
+                    b.Property<int?>("AwayTeamId")
                         .HasColumnType("int");
 
                     b.Property<int?>("AwayTeamScore")
                         .HasColumnType("int");
 
-                    b.Property<int>("HomeTeamId")
+                    b.Property<int?>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int?>("HomeTeamScore")
@@ -77,13 +77,13 @@ namespace Bolao_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<int>("AwayTeamId")
+                    b.Property<int?>("AwayTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("AwayTeamScore")
                         .HasColumnType("int");
 
-                    b.Property<int>("HomeTeamId")
+                    b.Property<int?>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("HomeTeamScore")
@@ -99,6 +99,10 @@ namespace Bolao_Backend.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AwayTeamId");
+
+                    b.HasIndex("HomeTeamId");
 
                     b.HasIndex("MatchId");
 
@@ -201,14 +205,12 @@ namespace Bolao_Backend.Migrations
                     b.HasOne("Bolao.Models.TeamModel", "AwayTeam")
                         .WithMany()
                         .HasForeignKey("AwayTeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Bolao.Models.TeamModel", "HomeTeam")
                         .WithMany()
                         .HasForeignKey("HomeTeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Bolao.Models.TeamModel", "Winner")
                         .WithMany()
@@ -223,6 +225,14 @@ namespace Bolao_Backend.Migrations
 
             modelBuilder.Entity("Bolao.Models.PredictionModel", b =>
                 {
+                    b.HasOne("Bolao.Models.TeamModel", "AwayTeam")
+                        .WithMany()
+                        .HasForeignKey("AwayTeamId");
+
+                    b.HasOne("Bolao.Models.TeamModel", "HomeTeam")
+                        .WithMany()
+                        .HasForeignKey("HomeTeamId");
+
                     b.HasOne("Bolao.Models.MatchModel", "Match")
                         .WithMany()
                         .HasForeignKey("MatchId")
@@ -234,6 +244,10 @@ namespace Bolao_Backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AwayTeam");
+
+                    b.Navigation("HomeTeam");
 
                     b.Navigation("Match");
 

@@ -17,7 +17,6 @@ const Navbar = () => {
               <span className="ml-2 text-xl font-bold text-gray-900">Bolao</span>
             </div>
             <div className="ml-6 flex items-center">
-              <Link to="/grups" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Grupos</Link>
               <Link to="/rank" className="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium">Ranking</Link>
             </div>
             <div className="hidden md:ml-10 md:flex md:space-x-8">
@@ -74,7 +73,6 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="pt-2 pb-3 space-y-1">
-            <Link to="/grups" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Grupos</Link>
             <Link to="/rank" className="block px-4 py-2 text-base font-medium text-gray-600 hover:bg-gray-50">Ranking</Link>
             {user && (
               <Link to="/mygame" className="block px-4 py-2 text-base font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors rounded-md mx-4">Meu Jogo</Link>

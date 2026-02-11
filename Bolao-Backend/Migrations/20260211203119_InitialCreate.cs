@@ -77,9 +77,9 @@ namespace Bolao_Backend.Migrations
                     Stage = table.Column<int>(type: "int", nullable: false),
                     Round = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    HomeTeamId = table.Column<int>(type: "int", nullable: false),
+                    HomeTeamId = table.Column<int>(type: "int", nullable: true),
                     HomeTeamScore = table.Column<int>(type: "int", nullable: true),
-                    AwayTeamId = table.Column<int>(type: "int", nullable: false),
+                    AwayTeamId = table.Column<int>(type: "int", nullable: true),
                     AwayTeamScore = table.Column<int>(type: "int", nullable: true),
                     WinnerId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -113,9 +113,9 @@ namespace Bolao_Backend.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     MatchId = table.Column<int>(type: "int", nullable: false),
-                    HomeTeamId = table.Column<int>(type: "int", nullable: false),
+                    HomeTeamId = table.Column<int>(type: "int", nullable: true),
                     HomeTeamScore = table.Column<int>(type: "int", nullable: false),
-                    AwayTeamId = table.Column<int>(type: "int", nullable: false),
+                    AwayTeamId = table.Column<int>(type: "int", nullable: true),
                     AwayTeamScore = table.Column<int>(type: "int", nullable: false),
                     PointsGained = table.Column<int>(type: "int", nullable: false)
                 },
@@ -128,6 +128,16 @@ namespace Bolao_Backend.Migrations
                         principalTable: "Matches",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Prediction_Teams_AwayTeamId",
+                        column: x => x.AwayTeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Prediction_Teams_HomeTeamId",
+                        column: x => x.HomeTeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Prediction_Users_UserId",
                         column: x => x.UserId,
@@ -151,6 +161,16 @@ namespace Bolao_Backend.Migrations
                 name: "IX_Matches_WinnerId",
                 table: "Matches",
                 column: "WinnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Prediction_AwayTeamId",
+                table: "Prediction",
+                column: "AwayTeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Prediction_HomeTeamId",
+                table: "Prediction",
+                column: "HomeTeamId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Prediction_MatchId",

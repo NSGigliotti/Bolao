@@ -6,7 +6,6 @@ import NotFoundPage from '../components/common/NotFoundPage';
 import AuthPage from '../pages/auth/AuthPage';
 import GameMake from '../pages/gamemake/GameMake';
 import MyGame from '../pages/mygame/MyGame';
-import GrupsPage from '../pages/grups/Grups';
 import RankPage from '../pages/Rank/RankPage';
 import GamesPage from '../pages/games/Games';
 import { useAuthContext } from '../contexts/AuthContext';
@@ -29,7 +28,6 @@ function AppRoutes() {
         <Route path='/auth' element={<AuthPage />} />
         <Route path='/gamemake' element={<UserTournamentRoute />} />
         <Route path='/mygame' element={<UserTournamentRoute />} />
-        <Route path='/grups' element={<GrupsPage />} />
         <Route path='/rank' element={<RankPage />} />
         <Route path='/user-games/:userId' element={<GamesPage />} />
 
