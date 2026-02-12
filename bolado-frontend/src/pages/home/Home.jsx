@@ -15,7 +15,7 @@ const HomePage = () => {
 
     const phases = [
         { id: 'Grupos', label: 'Grupos' },
-        { id: '32-avos', label: '32-avos' },
+        { id: 'Segunda-fase', label: 'Segunda fase' },
         { id: 'Oitavas', label: 'Oitavas' },
         { id: 'Quartas', label: 'Quartas' },
         { id: 'Semi', label: 'Semi' },
@@ -171,8 +171,8 @@ const HomePage = () => {
                     if (activeRound === 2) return name.includes('2ª') || name.includes('round 2');
                     if (activeRound === 3) return name.includes('3ª') || name.includes('round 3');
                     return true;
-                case '32-avos':
-                    return name.includes('32-avos');
+                case 'Segunda-fase':
+                    return name.includes('segunda fase') || name.includes('32-avos');
                 case 'Oitavas':
                     return name.includes('oitavas');
                 case 'Quartas':
@@ -180,7 +180,7 @@ const HomePage = () => {
                 case 'Semi':
                     return name.includes('semi');
                 case 'Final':
-                    return (name.includes('final') || name.includes('terceiro')) && !name.includes('oitavas') && !name.includes('quartas') && !name.includes('32-avos');
+                    return (name.includes('final') || name.includes('terceiro')) && !name.includes('oitavas') && !name.includes('quartas') && !name.includes('segunda fase') && !name.includes('32-avos');
                 default:
                     return true;
             }

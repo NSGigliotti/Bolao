@@ -149,7 +149,7 @@ INSERT INTO Matches (MatchDate, Stage, Status, HomeTeamId, AwayTeamId, HomeTeamS
 
 INSERT INTO Matches (MatchDate, Stage, Status, HomeTeamId, AwayTeamId, HomeTeamScore, AwayTeamScore) VALUES
 
--- 32-AVOS DE FINAL (STAGE 3)
+-- SEGUNDA FASE (STAGE 3)
 ('2026-06-28 22:00:00', 3, 0, NULL, NULL, NULL, NULL), -- Jogo 73
 ('2026-06-29 16:00:00', 3, 0, NULL, NULL, NULL, NULL), -- Jogo 74
 ('2026-06-29 19:00:00', 3, 0, NULL, NULL, NULL, NULL), -- Jogo 75

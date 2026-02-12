@@ -16,7 +16,7 @@ public class MachesService : IMachesService
         MatchStage.GroupStageRound1 => "1ª Rodada (Fase de Grupos)",
         MatchStage.GroupStageRound2 => "2ª Rodada (Fase de Grupos)",
         MatchStage.GroupStageRound3 => "3ª Rodada (Fase de Grupos)",
-        MatchStage.RoundOf32 => "32-avos de Final",
+        MatchStage.RoundOf32 => "Segunda fase",
         MatchStage.RoundOf16 => "Oitavas de Final",
         MatchStage.QuarterFinals => "Quartas de Final",
         MatchStage.SemiFinals => "Semifinais",

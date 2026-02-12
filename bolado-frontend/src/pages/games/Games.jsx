@@ -18,7 +18,7 @@ const GamesPage = () => {
             0: "1ª Rodada (Fase de Grupos)",
             1: "2ª Rodada (Fase de Grupos)",
             2: "3ª Rodada (Fase de Grupos)",
-            3: "32-avos de Final",
+            3: "Segunda fase",
             4: "Oitavas de Final",
             5: "Quartas de Final",
             6: "Semifinais",
