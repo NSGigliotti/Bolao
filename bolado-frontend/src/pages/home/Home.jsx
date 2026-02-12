@@ -321,7 +321,7 @@ const HomePage = () => {
                 <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
                         <h1 className="text-5xl font-black text-gray-900 tracking-tighter uppercase italic">
-                            Calendário <span className="text-blue-600">GE</span>
+                            Bolao <span className="text-blue-600">Gigliotti</span>
                         </h1>
                         <p className="text-gray-400 mt-2 font-bold tracking-tight uppercase text-xs">Tabela e Jogos da Copa do Mundo 2026</p>
                     </div>
