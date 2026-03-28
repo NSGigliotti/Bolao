@@ -153,7 +153,9 @@ public class MachesService : IMachesService
             UserRankPayloadDTOs userRank = new UserRankPayloadDTOs(
                 id: i.Id,
                 name: i.Name,
-                score: i.Score
+                score: i.Score,
+                status: i.Status
+
             );
             userRanks.Add(userRank);
         }

@@ -1,5 +1,5 @@
 //const BASE_URL = 'https://old-bushes-melt.loca.lt';
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'http://localhost:8081';
 
 export const API_ENDPOINTS = {
     LOGIN: `${BASE_URL}/User/Login`,
@@ -10,4 +10,5 @@ export const API_ENDPOINTS = {
     GET_MATCHES_BY_USER: `${BASE_URL}/Maches/GetMachesByUserId`,
     GET_GROUPS: `${BASE_URL}/Maches/GetMachesGups`,
     GET_RANKING: `${BASE_URL}/Maches/GetAllRankUser`,
+    UPDATE_PAYMENT: `${BASE_URL}/Admin/PaymentUpdate`,
 };

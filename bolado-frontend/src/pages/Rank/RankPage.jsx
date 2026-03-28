@@ -2,8 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
 import Navbar from '../../components/common/Navibar';
-import { Trophy, Medal, User, Loader2, AlertCircle, Flashlight } from 'lucide-react';
+import { Trophy, Medal, User, Loader2, AlertCircle, Flashlight, XCircle, CheckCircle2, Ban } from 'lucide-react';
 import { API_ENDPOINTS } from '../../services/api';
+
+const PaymentStatusToggle = ({ userId, initialStatus }) => {
+    const [status, setStatus] = useState(initialStatus || 1);
+    const [loading, setLoading] = useState(false);
+
+    const cycleStatus = async () => {
+        const nextStatus = status === 1 ? 2 : status === 2 ? 3 : 1;
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(API_ENDPOINTS.UPDATE_PAYMENT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    Id: userId,
+                    CodeENUMPayment: nextStatus
+                })
+            });
+
+            if (response.ok) {
+                setStatus(nextStatus);
+            } else {
+                console.error("Failed to update payment status");
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <Loader2 className="w-4 h-4 animate-spin text-gray-400 inline ml-2" />;
+
+    return (
+        <button onClick={(e) => { e.stopPropagation(); cycleStatus(); }} title="Mudar Status de Pagamento" className="ml-2 focus:outline-none align-middle inline-flex">
+            {status === 1 && <XCircle className="w-4 h-4 text-red-500" />}
+            {status === 2 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+            {status === 3 && <Ban className="w-4 h-4 text-red-700" />}
+        </button>
+    );
+};
 
 const RankPage = () => {
     const navigate = useNavigate();
@@ -193,14 +237,19 @@ const RankPage = () => {
                                                                 {user.name.charAt(0).toUpperCase()}
                                                             </div>
                                                             <div className="flex-grow">
-                                                                <div
-                                                                    className="text-sm font-bold text-gray-900 leading-tight hover:text-indigo-600 cursor-pointer transition-colors inline-block"
-                                                                    onClick={() => {
-                                                                        const isCurrentUser = currentUser && (currentUser.id === user.id);
-                                                                        navigate(isCurrentUser ? '/mygame' : `/user-games/${user.id}`, { state: { userName: user.name } });
-                                                                    }}
-                                                                >
-                                                                    {user.name}
+                                                                <div className="flex items-center">
+                                                                    <div
+                                                                        className="text-sm font-bold text-gray-900 leading-tight hover:text-indigo-600 cursor-pointer transition-colors inline-block"
+                                                                        onClick={() => {
+                                                                            const isCurrentUser = currentUser && (currentUser.id === user.id);
+                                                                            navigate(isCurrentUser ? '/mygame' : `/user-games/${user.id}`, { state: { userName: user.name } });
+                                                                        }}
+                                                                    >
+                                                                        {user.name}
+                                                                    </div>
+                                                                    {currentUser?.role === 'Admin' && (
+                                                                        <PaymentStatusToggle userId={user.id} initialStatus={user.status} />
+                                                                    )}
                                                                 </div>
                                                                 {(group.prizePercentage > 0 || group.isLast) && (
                                                                     <div className={`text-[10px] font-medium flex items-center mt-0.5 uppercase tracking-tighter ${group.isLast && group.position > 3 ? 'text-blue-600' : 'text-gray-500'
