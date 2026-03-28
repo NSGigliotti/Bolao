@@ -9,8 +9,9 @@ const PaymentStatusToggle = ({ userId, initialStatus }) => {
     const [status, setStatus] = useState(initialStatus || 1);
     const [loading, setLoading] = useState(false);
 
-    const cycleStatus = async () => {
-        const nextStatus = status === 1 ? 2 : status === 2 ? 3 : 1;
+    const updateStatus = async (e) => {
+        e.stopPropagation();
+        const nextStatus = parseInt(e.target.value, 10);
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -41,11 +42,20 @@ const PaymentStatusToggle = ({ userId, initialStatus }) => {
     if (loading) return <Loader2 className="w-4 h-4 animate-spin text-gray-400 inline ml-2" />;
 
     return (
-        <button onClick={(e) => { e.stopPropagation(); cycleStatus(); }} title="Mudar Status de Pagamento" className="ml-2 focus:outline-none align-middle inline-flex">
-            {status === 1 && <XCircle className="w-4 h-4 text-red-500" />}
-            {status === 2 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-            {status === 3 && <Ban className="w-4 h-4 text-red-700" />}
-        </button>
+        <select 
+            value={status} 
+            onChange={updateStatus} 
+            onClick={(e) => e.stopPropagation()} 
+            className={`ml-2 text-xs font-bold rounded border bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 py-0.5 px-1 inline-block align-middle cursor-pointer ${
+                status === 1 ? 'text-red-500 border-red-200' : 
+                status === 2 ? 'text-green-600 border-green-200' : 
+                'text-gray-500 border-gray-200 line-through'
+            }`}
+        >
+            <option value={1} className="text-red-500 font-medium">Pendente</option>
+            <option value={2} className="text-green-600 font-medium">Pago</option>
+            <option value={3} className="text-gray-500 font-medium line-through">Cancelado</option>
+        </select>
     );
 };
 

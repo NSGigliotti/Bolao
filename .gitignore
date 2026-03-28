@@ -568,3 +568,9 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/dotenv,dotnetcore,aspnetcore,react,visualstudio,visualstudiocode
 *.tex
+
+# Load Test k6 scripts
+load_test*.js
+
+# Monitoring files (Grafana/Prometheus)
+monitoring/
