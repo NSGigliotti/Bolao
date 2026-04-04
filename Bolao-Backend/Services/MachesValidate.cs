@@ -6,25 +6,25 @@ public class MachesValidate
 {
     private readonly Dictionary<int, (string Home, string Away)> BracketMapping = new()
     {
-        // Round of 32 (Matches 73-88)
+        //* Round of 32 (Matches 73-88)
         { 73, ("2A", "2B") },
-        { 74, ("1E", "3rd_74") }, // 3rd A/B/C/D/F
+        { 74, ("1E", "3rd_74") }, //* 3rd A/B/C/D/F
         { 75, ("1F", "2C") },
         { 76, ("1C", "2F") },
-        { 77, ("1I", "3rd_77") }, // 3rd C/D/F/G/H
+        { 77, ("1I", "3rd_77") }, //* 3rd C/D/F/G/H
         { 78, ("2E", "2I") },
-        { 79, ("1A", "3rd_79") }, // 3rd C/E/F/H/I
-        { 80, ("1L", "3rd_80") }, // 3rd E/H/I/J/K
-        { 81, ("1D", "3rd_81") }, // 3rd B/E/F/I/J
-        { 82, ("1G", "3rd_82") }, // 3rd A/E/H/I/J
+        { 79, ("1A", "3rd_79") }, //* 3rd C/E/F/H/I
+        { 80, ("1L", "3rd_80") }, //* 3rd E/H/I/J/K
+        { 81, ("1D", "3rd_81") }, //* 3rd B/E/F/I/J
+        { 82, ("1G", "3rd_82") }, //* 3rd A/E/H/I/J
         { 83, ("2K", "2L") },
         { 84, ("1H", "2J") },
-        { 85, ("1B", "3rd_85") }, // 3rd E/F/G/I/J
+        { 85, ("1B", "3rd_85") }, //* 3rd E/F/G/I/J
         { 86, ("1J", "2H") },
-        { 87, ("1K", "3rd_87") }, // 3rd D/E/I/J/L
+        { 87, ("1K", "3rd_87") }, //* 3rd D/E/I/J/L
         { 88, ("2D", "2G") },
 
-        // Round of 16 (Matches 89-96)
+        //* Round of 16 (Matches 89-96)
         { 89, ("W74", "W77") },
         { 90, ("W73", "W75") },
         { 91, ("W76", "W78") },
@@ -34,20 +34,20 @@ public class MachesValidate
         { 95, ("W86", "W88") },
         { 96, ("W85", "W87") },
 
-        // Quarter Finals (Matches 97-100)
+        //* Quarter Finals (Matches 97-100)
         { 97, ("W89", "W90") },
         { 98, ("W93", "W94") },
         { 99, ("W91", "W92") },
         { 100, ("W95", "W96") },
 
-        // Semi Finals (Matches 101-102)
+        //* Semi Finals (Matches 101-102)
         { 101, ("W97", "W98") },
         { 102, ("W99", "W100") },
 
-        // 3rd Place (Match 103)
+        //* 3rd Place (Match 103)
         { 103, ("L101", "L102") },
 
-        // Final (Match 104)
+        //* Final (Match 104)
         { 104, ("W101", "W102") }
     };
 
@@ -56,7 +56,6 @@ public class MachesValidate
         var allMatches = await repository.GetAllMatch();
         var allTeams = await repository.GetGroupsAsync();
 
-        // 1. Reset tournament stats and recalculate group stages
         foreach (var t in allTeams)
         {
             t.Points = 0;
@@ -104,22 +103,18 @@ public class MachesValidate
             }
         }
 
-        // 2. Determine Qualifiers
         var groups = allTeams.GroupBy(t => t.Group).ToDictionary(g => g.Key, g => g.OrderByDescending(t => t.Points).ThenByDescending(t => t.GoalDifference).ThenByDescending(t => t.GoalsFor).ThenByDescending(t => t.Wins).ToList());
 
         var firstPlace = groups.ToDictionary(g => g.Key, g => g.Value[0]);
         var secondPlace = groups.ToDictionary(g => g.Key, g => g.Value[1]);
         var thirdPlace = groups.Values.Select(g => g[2]).OrderByDescending(t => t.Points).ThenByDescending(t => t.GoalDifference).ThenByDescending(t => t.GoalsFor).ThenByDescending(t => t.Wins).Take(8).ToList();
 
-        // 3. Round of 32 Assignment logic (simplified constraint matching for 3rd places)
         var qualMap = new Dictionary<string, TeamModel>();
         foreach (var g in firstPlace) qualMap[$"1{g.Key}"] = g.Value;
         foreach (var g in secondPlace) qualMap[$"2{g.Key}"] = g.Value;
 
-        // Special 3rd place assignment logic to satisfy FIFA link constraints
         AssignThirdPlaces(thirdPlace, qualMap);
 
-        // 4. Update Matches in sequence
         var knockoutMatches = allMatches.Where(m => m.Id >= 73).OrderBy(m => m.Id).ToList();
         foreach (var match in knockoutMatches)
         {
@@ -128,7 +123,6 @@ public class MachesValidate
             match.HomeTeamId = ResolveTeam(rule.Home, qualMap, allMatches);
             match.AwayTeamId = ResolveTeam(rule.Away, qualMap, allMatches);
 
-            // If teams are not defined yet, reset status
             if (match.HomeTeamId == null || match.AwayTeamId == null)
             {
                 match.Status = MatchStatus.NotStarted;
@@ -140,13 +134,11 @@ public class MachesValidate
             await repository.UpdateMatchAsync(match);
         }
 
-        // Save team stats
         foreach (var t in allTeams) await repository.UpdateTeam(t);
     }
 
     private void AssignThirdPlaces(List<TeamModel> thirdPlace, Dictionary<string, TeamModel> qualMap)
     {
-        // Constraints from the link
         var slots = new List<(string Label, List<char> AllowedGroups)>
         {
             ("3rd_74", new List<char>{'A','B','C','D','F'}),
@@ -162,7 +154,6 @@ public class MachesValidate
         var availableTeams = thirdPlace.ToList();
         foreach (var slot in slots)
         {
-            // Pick the best available team that is allowed in this slot
             var team = availableTeams.FirstOrDefault(t => slot.AllowedGroups.Contains(t.Group));
             if (team != null)
             {
