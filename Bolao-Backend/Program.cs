@@ -18,22 +18,33 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+// builder.Services.AddCors(options =>
+// {
+
+//     //  options.AddPolicy("AllowFrontend",
+//     //     builder =>
+//     //     {
+//     //         builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
+//     //                .AllowAnyHeader()
+//     //                .AllowAnyMethod();
+//     //     });
+//     options.AddPolicy("LocalTunnelPolicy", policy =>
+//     {
+//         policy.AllowAnyOrigin() 
+//               .AllowAnyHeader()
+//               .AllowAnyMethod()
+//               .WithExposedHeaders("bypass-tunnel-reminder"); 
+//     });
+// });
+
 builder.Services.AddCors(options =>
 {
-
-    //  options.AddPolicy("AllowFrontend",
-    //     builder =>
-    //     {
-    //         builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
-    //                .AllowAnyHeader()
-    //                .AllowAnyMethod();
-    //     });
-    options.AddPolicy("LocalTunnelPolicy", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() 
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .WithExposedHeaders("bypass-tunnel-reminder"); 
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -225,7 +236,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.UseCors("LocalTunnelPolicy");
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
