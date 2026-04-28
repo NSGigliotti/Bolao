@@ -170,4 +170,50 @@ public class MachesService : IMachesService
         predictions.Sort((x, y) => x.MatchId.CompareTo(y.MatchId));
         return predictions;
     }
+
+   public async Task<Guid> CreateAPrediction(MakePredictionDTOs predictionDto, Guid id)
+{
+    if (predictionDto == null)  throw new Exception("Palpite inválido");
+
+    // Se ainda quiser impedir duplicidade por jogo
+    if (await _machesRepository.UserAlreadyPredictedMatch(id, predictionDto.MatchId)) throw new Exception("Usuário já fez palpite para essa partida");
+
+    var match = await _machesRepository.GetMatchAsync(predictionDto.MatchId);
+
+    if (match == null)
+        throw new Exception("Partida não encontrada");
+
+    if (match.Stage >= Bolao.Enum.MatchStage.RoundOf32 && predictionDto.HomeTeamScore == predictionDto.AwayTeamScore)
+    {
+        throw new Exception($"Empates não são permitidos em mata-mata ({match.Id})");
+    }
+
+    var prediction = new PredictionModel(
+        userId: id,
+        matchId: predictionDto.MatchId,
+        homeTeamScore: predictionDto.HomeTeamScore,
+        awayTeamScore: predictionDto.AwayTeamScore,
+        homeTeamId: predictionDto.IdHomeTeam,
+        awayTeamId: predictionDto.IdAwayTeam
+    );
+
+    await _machesRepository.SaveAPPrediction(prediction);
+  
+    return prediction.Id;
+}
+
+    public Task UpdatePrediction(UpdatePredicitionDTOS updatePredicition, Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task FinishPrediction(Guid id)
+    {
+        var user = await _userRepository.GetUserFromID(id);
+        user.GameMake = true;
+        await _userRepository.UpdateUser(user);
+
+     var token = _userRepository.CreatToken(user);
+
+    }
 }

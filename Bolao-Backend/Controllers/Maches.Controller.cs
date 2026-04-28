@@ -83,5 +83,59 @@ public class MachesController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpPost("CreateAPrediction")]
+    public async Task<IActionResult> CreateAPrediction([FromBody] MakePredictionDTOs makePrediction)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid id)) return Unauthorized("Usuário não identificado ou formato de ID inválido.");
+
+        try
+        {
+           Guid idMach =  await _machesService.CreateAPrediction(makePrediction, id);
+           return Ok(idMach);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("UpdatePreditions")]
+    public async Task<IActionResult> UpdatePreditions([FromBody] UpdatePredicitionDTOS updatePredicition)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid id)) return Unauthorized("Usuário não identificado ou formato de ID inválido.");
+
+        try
+        {
+            await _machesService.UpdatePrediction(updatePredicition, id);
+           return Ok();
+        }
+        catch (Exception ex)
+        {
+          return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("FinishPredictions")]
+    public async Task<IActionResult> FinishPredictions()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid id)) return Unauthorized("Usuário não identificado ou formato de ID inválido.");
+
+        try
+        {
+          await _machesService.FinishPrediction(id);
+          return Ok();
+        }
+        catch (Exception ex)
+        {
+          return BadRequest(ex.Message);
+        }
+    }
 }
 

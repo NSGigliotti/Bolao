@@ -16,4 +16,6 @@ public interface IMachesRepository
    Task UpdateMatchAsync(MatchModel match);
    Task UpdatePredictionAsync(PredictionModel prediction);
    Task<List<UserModel>> GetAllRankUsers();
+   Task<Guid> SaveAPPrediction(PredictionModel prediction);
+   Task<bool> UserAlreadyPredictedMatch (Guid id, int matchId);
 }

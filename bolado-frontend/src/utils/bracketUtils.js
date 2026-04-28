@@ -1,4 +1,200 @@
 
+// ============================================================
+// Critérios de Desempate FIFA 2026 - Fase de Grupos
+// https://www.fifa.com/pt/tournaments/mens/worldcup/canadamexicousa2026/articles/copa-mundo-grupos-regulamento-classificacao-desempate
+//
+// Hierarquia:
+// 1. Pontos totais
+// 2. Confronto direto: pontos entre empatados
+// 3. Confronto direto: saldo de gols entre empatados
+// 4. Confronto direto: gols marcados entre empatados
+//    (reaplicar entre subgrupo ainda empatado)
+// 5. Saldo de gols geral
+// 6. Gols marcados geral
+// 7. Fair Play (não implementado - sem dados de cartões)
+// 8. Ranking FIFA (não implementado - sem dados)
+// ============================================================
+
+/**
+ * Resolve o placar de um jogo, priorizando palpite do usuário.
+ */
+const resolveMatchScore = (match, predictions) => {
+    const pred = predictions[match.id];
+
+    if (pred && pred.home !== undefined && pred.away !== undefined) {
+        return { home: parseInt(pred.home), away: parseInt(pred.away) };
+    }
+
+    if (match.status === 2 || (match.homeTeamScore !== null && match.awayTeamScore !== null)) {
+        return { home: match.homeTeamScore, away: match.awayTeamScore };
+    }
+
+    return null;
+};
+
+/**
+ * Calcula stats de confronto direto entre um subconjunto de times.
+ * Retorna mapa teamId -> { points, goalsFor, goalsAgainst }
+ */
+const getHeadToHeadStats = (teamIds, groupMatches, predictions) => {
+    const teamIdSet = new Set(teamIds);
+    const stats = {};
+
+    teamIds.forEach(id => {
+        stats[id] = { points: 0, goalsFor: 0, goalsAgainst: 0 };
+    });
+
+    groupMatches.forEach(match => {
+        if (!match.homeTeam || !match.awayTeam) return;
+
+        const hId = match.homeTeamId;
+        const aId = match.awayTeamId;
+
+        // Só considerar jogos entre os times empatados
+        if (!teamIdSet.has(hId) || !teamIdSet.has(aId)) return;
+
+        const score = resolveMatchScore(match, predictions);
+        if (!score || score.home === undefined || score.away === undefined) return;
+
+        stats[hId].goalsFor += score.home;
+        stats[hId].goalsAgainst += score.away;
+        stats[aId].goalsFor += score.away;
+        stats[aId].goalsAgainst += score.home;
+
+        if (score.home > score.away) {
+            stats[hId].points += 3;
+        } else if (score.home < score.away) {
+            stats[aId].points += 3;
+        } else {
+            stats[hId].points += 1;
+            stats[aId].points += 1;
+        }
+    });
+
+    return stats;
+};
+
+/**
+ * Ordena um array de times pelo critério geral (sem confronto direto).
+ * Usado para melhores terceiros (grupos diferentes) e como fallback final.
+ */
+const sortByOverallCriteria = (a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    const gdA = a.goalsFor - a.goalsAgainst;
+    const gdB = b.goalsFor - b.goalsAgainst;
+    if (gdB !== gdA) return gdB - gdA;
+    if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+    // Desempate final determinístico (nome alfabético)
+    return a.name.localeCompare(b.name);
+};
+
+/**
+ * Aplica os critérios FIFA de desempate a um grupo de times empatados em pontos.
+ * Retorna o array ordenado.
+ * 
+ * @param {Array} tiedTeams - Times com mesma pontuação
+ * @param {Array} groupMatches - Todos os jogos do grupo (filtrados por grupo)
+ * @param {Object} predictions - Palpites do usuário
+ * @returns {Array} Times ordenados segundo critérios FIFA
+ */
+const resolveTiedTeams = (tiedTeams, groupMatches, predictions) => {
+    if (tiedTeams.length <= 1) return tiedTeams;
+
+    const teamIds = tiedTeams.map(t => t.id);
+    const h2h = getHeadToHeadStats(teamIds, groupMatches, predictions);
+
+    // Tentar resolver por confronto direto: pontos → saldo → gols marcados
+    const withH2H = tiedTeams.map(t => ({
+        ...t,
+        h2hPoints: h2h[t.id].points,
+        h2hGD: h2h[t.id].goalsFor - h2h[t.id].goalsAgainst,
+        h2hGF: h2h[t.id].goalsFor,
+    }));
+
+    withH2H.sort((a, b) => {
+        if (b.h2hPoints !== a.h2hPoints) return b.h2hPoints - a.h2hPoints;
+        if (b.h2hGD !== a.h2hGD) return b.h2hGD - a.h2hGD;
+        if (b.h2hGF !== a.h2hGF) return b.h2hGF - a.h2hGF;
+        return 0; // Ainda empatados após confronto direto
+    });
+
+    // Verificar se o confronto direto resolveu totalmente
+    // Agrupar os que ainda ficaram empatados após H2H
+    const result = [];
+    let i = 0;
+    while (i < withH2H.length) {
+        let j = i + 1;
+        while (j < withH2H.length &&
+            withH2H[j].h2hPoints === withH2H[i].h2hPoints &&
+            withH2H[j].h2hGD === withH2H[i].h2hGD &&
+            withH2H[j].h2hGF === withH2H[i].h2hGF) {
+            j++;
+        }
+
+        const stillTied = withH2H.slice(i, j);
+
+        if (stillTied.length === 1) {
+            result.push(stillTied[0]);
+        } else if (stillTied.length < tiedTeams.length) {
+            // Subgrupo menor ainda empatado — reaplicar confronto direto entre eles
+            const resolved = resolveTiedTeams(stillTied, groupMatches, predictions);
+            result.push(...resolved);
+        } else {
+            // Todos ainda empatados após H2H — aplicar critérios gerais (saldo geral → gols gerais)
+            stillTied.sort((a, b) => {
+                const gdA = a.goalsFor - a.goalsAgainst;
+                const gdB = b.goalsFor - b.goalsAgainst;
+                if (gdB !== gdA) return gdB - gdA;
+                if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+                // Desempate final determinístico
+                return a.name.localeCompare(b.name);
+            });
+            result.push(...stillTied);
+        }
+
+        i = j;
+    }
+
+    return result;
+};
+
+/**
+ * Ordena times de um grupo usando critérios FIFA 2026.
+ * 
+ * @param {Array} teamsArray - Times do grupo
+ * @param {Array} groupMatches - Jogos do grupo
+ * @param {Object} predictions - Palpites
+ * @returns {Array} Times ordenados
+ */
+const sortByFifaCriteria = (teamsArray, groupMatches, predictions) => {
+    // Primeiro, ordenar por pontos
+    teamsArray.sort((a, b) => b.points - a.points);
+
+    // Agrupar times com mesma pontuação
+    const result = [];
+    let i = 0;
+    while (i < teamsArray.length) {
+        let j = i + 1;
+        while (j < teamsArray.length && teamsArray[j].points === teamsArray[i].points) {
+            j++;
+        }
+
+        const samePointsGroup = teamsArray.slice(i, j);
+
+        if (samePointsGroup.length === 1) {
+            result.push(samePointsGroup[0]);
+        } else {
+            // Aplicar critérios FIFA de desempate
+            const resolved = resolveTiedTeams(samePointsGroup, groupMatches, predictions);
+            result.push(...resolved);
+        }
+
+        i = j;
+    }
+
+    return result;
+};
+
 export const calculateStandings = (matches, predictions) => {
     // Collect all teams and their initial stats
     const teams = {};
@@ -22,10 +218,6 @@ export const calculateStandings = (matches, predictions) => {
         }
     };
 
-    // Iterate through group stage matches (Stage 0, 1, 2 in SQL = Rounds 1, 2, 3 of Group Stage)
-    // MatchesModel uses enum MatchStage.GroupStageRound1=0, etc.
-    // We assume matches passed here are the raw list from API.
-
     // Filter only group matches (Stage 0, 1, 2)
     const groupMatches = matches.filter(m => m.stage <= 2);
 
@@ -36,44 +228,24 @@ export const calculateStandings = (matches, predictions) => {
         initTeam(match.homeTeamId, match.homeTeam.name, match.homeTeam.group, match.homeTeam.flagUrl);
         initTeam(match.awayTeamId, match.awayTeam.name, match.awayTeam.group, match.awayTeam.flagUrl);
 
-        // Get prediction if exists
-        const pred = predictions[match.id];
+        const score = resolveMatchScore(match, predictions);
 
-        // Only calculate if we have a full valid score (predicted or official)
-        // If official match is finished (status 2), use official score? 
-        // User wants "palpites", so likely use prediction overrides or fallback to official if provided?
-        // Let's use predictions primarily for "Simulador".
-
-        let hScore = undefined;
-        let aScore = undefined;
-
-        if (pred && pred.home !== undefined && pred.away !== undefined) {
-            hScore = parseInt(pred.home);
-            aScore = parseInt(pred.away);
-        } else if (match.status === 2 || (match.homeTeamScore !== null && match.awayTeamScore !== null)) {
-            // Fallback to official result if available and no prediction?
-            // Or maybe just ignore? Let's ignore official if we are simulating predictions.
-            // Actually user might want to see real standings. Let's use official if no prediction.
-            hScore = match.homeTeamScore;
-            aScore = match.awayTeamScore;
-        }
-
-        if (hScore !== undefined && aScore !== undefined) {
+        if (score && score.home !== undefined && score.away !== undefined) {
             const home = teams[match.homeTeamId];
             const away = teams[match.awayTeamId];
 
             home.matchesPlayed++;
             away.matchesPlayed++;
-            home.goalsFor += hScore;
-            home.goalsAgainst += aScore;
-            away.goalsFor += aScore;
-            away.goalsAgainst += hScore;
+            home.goalsFor += score.home;
+            home.goalsAgainst += score.away;
+            away.goalsFor += score.away;
+            away.goalsAgainst += score.home;
 
-            if (hScore > aScore) {
+            if (score.home > score.away) {
                 home.points += 3;
                 home.wins++;
                 away.losses++;
-            } else if (hScore < aScore) {
+            } else if (score.home < score.away) {
                 away.points += 3;
                 away.wins++;
                 home.losses++;
@@ -86,21 +258,28 @@ export const calculateStandings = (matches, predictions) => {
         }
     });
 
-    // Convert to array and sort
-    // Rules: Points > GD > GF > Wins
-    const sortedTeams = Object.values(teams).sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        const gdA = a.goalsFor - a.goalsAgainst;
-        const gdB = b.goalsFor - b.goalsAgainst;
-        if (gdB !== gdA) return gdB - gdA;
-        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-        return b.wins - a.wins;
+    // Agrupar por grupo e aplicar critérios FIFA dentro de cada grupo
+    const teamsByGroup = {};
+    Object.values(teams).forEach(t => {
+        if (!teamsByGroup[t.group]) teamsByGroup[t.group] = [];
+        teamsByGroup[t.group].push(t);
+    });
+
+    const sortedTeams = [];
+    Object.keys(teamsByGroup).sort().forEach(group => {
+        const groupTeams = teamsByGroup[group];
+        // Filtrar jogos deste grupo específico
+        const thisGroupMatches = groupMatches.filter(m =>
+            m.homeTeam && m.homeTeam.group === group
+        );
+        const sorted = sortByFifaCriteria(groupTeams, thisGroupMatches, predictions);
+        sortedTeams.push(...sorted);
     });
 
     return sortedTeams;
 };
 
-export const getQualifiers = (standings) => {
+export const getQualifiers = (standings, matches, predictions) => {
     // Group teams by group
     const groups = {};
     standings.forEach(t => {
@@ -112,59 +291,44 @@ export const getQualifiers = (standings) => {
     const secondPlace = {};
     const thirdPlace = [];
 
-    // Check total groups expected (12)
-    // We can count keys in 'groups' to know how many we have data for
     const groupKeys = Object.keys(groups);
     let fullyCompletedGroups = 0;
 
-    // Sort each group and extract qualifiers ONLY if complete
+    // Filter group stage matches
+    const groupMatches = matches ? matches.filter(m => m.stage <= 2) : [];
+
     groupKeys.forEach(g => {
         const teamList = groups[g];
 
-        // Check completion: All 4 teams must have played 3 matches
-        // (Or just check if total matches played by sum / 2 === 6?)
-        // Safest: Check every team has matchesPlayed === 3
         const isGroupComplete = teamList.length === 4 && teamList.every(t => t.matchesPlayed === 3);
 
         if (isGroupComplete) {
             fullyCompletedGroups++;
 
-            teamList.sort((a, b) => {
-                if (b.points !== a.points) return b.points - a.points;
-                const gdA = a.goalsFor - a.goalsAgainst;
-                const gdB = b.goalsFor - b.goalsAgainst;
-                if (gdB !== gdA) return gdB - gdA;
-                if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-                return b.wins - a.wins;
-            });
+            // Filtrar jogos deste grupo
+            const thisGroupMatches = groupMatches.filter(m =>
+                m.homeTeam && m.homeTeam.group === g
+            );
 
-            if (teamList[0]) firstPlace[g] = teamList[0];
-            if (teamList[1]) secondPlace[g] = teamList[1];
-            if (teamList[2]) thirdPlace.push(teamList[2]);
+            // Aplicar critérios FIFA
+            const sorted = sortByFifaCriteria([...teamList], thisGroupMatches, predictions || {});
+
+            if (sorted[0]) firstPlace[g] = sorted[0];
+            if (sorted[1]) secondPlace[g] = sorted[1];
+            if (sorted[2]) thirdPlace.push(sorted[2]);
         }
     });
 
-    // Best 3rds logic: Only calculate if ALL 12 groups are complete
-    // Why? Beacuse a 3rd place from an incomplete group could theoretically improve/worsen
-    // and displace someone.
+    // Best 3rds: critério geral (sem confronto direto, pois são de grupos diferentes)
     let bestThirds = [];
     if (fullyCompletedGroups === 12) {
-        thirdPlace.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            const gdA = a.goalsFor - a.goalsAgainst;
-            const gdB = b.goalsFor - b.goalsAgainst;
-            if (gdB !== gdA) return gdB - gdA;
-            if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-            return b.wins - a.wins;
-        });
-        bestThirds = thirdPlace.slice(0, 8); // Top 8 best 3rds
+        thirdPlace.sort(sortByOverallCriteria);
+        bestThirds = thirdPlace.slice(0, 8);
     } else {
-        // If not all groups are complete, we CANNOT determine the definitive 8 best 3rds.
-        // So we return empty list for best 3rds.
         bestThirds = [];
     }
 
-    return { firstPlace, secondPlace, bestThirds }; // Map of group -> team
+    return { firstPlace, secondPlace, bestThirds };
 };
 
 // Bracket Map - simplified based on user's Match 73 hints & 104 matches total
@@ -223,7 +387,7 @@ export const simulateKnockout = (matches, predictions) => {
     const standings = calculateStandings(matches, predictions);
 
     // 2. Get qualifiers
-    const { firstPlace, secondPlace, bestThirds } = getQualifiers(standings);
+    const { firstPlace, secondPlace, bestThirds } = getQualifiers(standings, matches, predictions);
 
     // Helper to find best third from specific groups? 
     // Usually strict table based on combination of groups providing 3rd place.

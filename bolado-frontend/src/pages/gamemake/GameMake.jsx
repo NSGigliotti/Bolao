@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Save, Loader2, Calendar, AlertCircle, ChevronRight } from 'lucide-react';
+import { Trophy, Save, Loader2, Calendar, AlertCircle, ChevronRight, Check } from 'lucide-react';
 import Navbar from '../../components/common/Navibar';
 import { useGameMake } from '../../hooks/useGameMake';
 
@@ -11,6 +11,8 @@ const GameMake = () => {
         predictions,
         activeTab,
         simulatedTeams,
+        savingMatches,
+        savedMatches,
         setActiveTab,
         handleScoreChange,
         handleBlur,
@@ -34,7 +36,20 @@ const GameMake = () => {
         }
 
         return (
-            <div key={match.id} className={`bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all ${headerLabel ? 'border-t-4 border-t-yellow-400' : ''}`}>
+            <div key={match.id} className={`bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative ${headerLabel ? 'border-t-4 border-t-yellow-400' : ''}`}>
+                {/* Save status indicator */}
+                {savingMatches[match.id] && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1 text-blue-500">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-xs font-medium">Salvando...</span>
+                    </div>
+                )}
+                {!savingMatches[match.id] && savedMatches[match.id] && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1 text-green-500">
+                        <Check className="w-4 h-4" />
+                        <span className="text-xs font-medium">Salvo</span>
+                    </div>
+                )}
                 {headerLabel && (
                     <div className="mb-4 text-center">
                         <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full uppercase tracking-wider">
@@ -145,10 +160,10 @@ const GameMake = () => {
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-green-600 hover:bg-green-700 text-white'
                             }`}
-                        title={!isTournamentComplete ? "Preencha todos os jogos para salvar" : "Salvar Jogo"}
+                        title={!isTournamentComplete ? "Preencha todos os jogos para finalizar" : "Finalizar Palpites"}
                     >
                         {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                        Salvar Jogo
+                        Finalizar Palpites
                     </button>
                 </div>
 

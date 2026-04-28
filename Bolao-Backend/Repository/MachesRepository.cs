@@ -102,4 +102,16 @@ public class MachesRepository : IMachesRepository
         _bolaoDbContext.Teams.Update(team);
         await _bolaoDbContext.SaveChangesAsync();
     }
+
+    public async Task<Guid> SaveAPPrediction(PredictionModel prediction)
+    {
+        _bolaoDbContext.Prediction.Add(prediction);
+       await _bolaoDbContext.SaveChangesAsync();
+       return prediction.Id;
+    }
+
+    public async Task<bool> UserAlreadyPredictedMatch(Guid id, int matchId)
+    {
+       return await _bolaoDbContext.Prediction.AnyAsync(p => p.UserId == id && p.MatchId == matchId);
+    }
 }
