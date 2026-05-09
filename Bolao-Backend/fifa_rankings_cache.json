@@ -1,0 +1,838 @@
+[
+  {
+    "pais": "França",
+    "pontos": 1877.32
+  },
+  {
+    "pais": "Espanha",
+    "pontos": 1876.40
+  },
+  {
+    "pais": "Argentina",
+    "pontos": 1874.81
+  },
+  {
+    "pais": "Inglaterra",
+    "pontos": 1825.97
+  },
+  {
+    "pais": "Portugal",
+    "pontos": 1763.83
+  },
+  {
+    "pais": "Brasil",
+    "pontos": 1761.16
+  },
+  {
+    "pais": "Países Baixos",
+    "pontos": 1757.87
+  },
+  {
+    "pais": "Marrocos",
+    "pontos": 1755.87
+  },
+  {
+    "pais": "Bélgica",
+    "pontos": 1734.71
+  },
+  {
+    "pais": "Alemanha",
+    "pontos": 1730.37
+  },
+  {
+    "pais": "Croácia",
+    "pontos": 1717.07
+  },
+  {
+    "pais": "Itália",
+    "pontos": 1700.37
+  },
+  {
+    "pais": "Colômbia",
+    "pontos": 1693.09
+  },
+  {
+    "pais": "Senegal",
+    "pontos": 1688.99
+  },
+  {
+    "pais": "México",
+    "pontos": 1681.03
+  },
+  {
+    "pais": "Estados Unidos",
+    "pontos": 1673.13
+  },
+  {
+    "pais": "Uruguai",
+    "pontos": 1673.07
+  },
+  {
+    "pais": "Japão",
+    "pontos": 1660.43
+  },
+  {
+    "pais": "Suíça",
+    "pontos": 1649.40
+  },
+  {
+    "pais": "Dinamarca",
+    "pontos": 1620.81
+  },
+  {
+    "pais": "Irã",
+    "pontos": 1615.30
+  },
+  {
+    "pais": "Turquia",
+    "pontos": 1599.04
+  },
+  {
+    "pais": "Equador",
+    "pontos": 1594.78
+  },
+  {
+    "pais": "Áustria",
+    "pontos": 1593.45
+  },
+  {
+    "pais": "Coreia do Sul",
+    "pontos": 1588.66
+  },
+  {
+    "pais": "Nigéria",
+    "pontos": 1585.09
+  },
+  {
+    "pais": "Austrália",
+    "pontos": 1580.67
+  },
+  {
+    "pais": "Argélia",
+    "pontos": 1564.26
+  },
+  {
+    "pais": "Egito",
+    "pontos": 1563.24
+  },
+  {
+    "pais": "Canadá",
+    "pontos": 1556.48
+  },
+  {
+    "pais": "Noruega",
+    "pontos": 1550.94
+  },
+  {
+    "pais": "Ucrânia",
+    "pontos": 1546.88
+  },
+  {
+    "pais": "Panamá",
+    "pontos": 1540.64
+  },
+  {
+    "pais": "Costa do Marfim",
+    "pontos": 1532.98
+  },
+  {
+    "pais": "Polônia",
+    "pontos": 1528.00
+  },
+  {
+    "pais": "Rússia",
+    "pontos": 1525.60
+  },
+  {
+    "pais": "País de Gales",
+    "pontos": 1524.29
+  },
+  {
+    "pais": "Suécia",
+    "pontos": 1514.77
+  },
+  {
+    "pais": "Sérvia",
+    "pontos": 1508.65
+  },
+  {
+    "pais": "Paraguai",
+    "pontos": 1503.50
+  },
+  {
+    "pais": "Tchéquia",
+    "pontos": 1501.38
+  },
+  {
+    "pais": "Hungria",
+    "pontos": 1500.58
+  },
+  {
+    "pais": "Escócia",
+    "pontos": 1498.35
+  },
+  {
+    "pais": "Tunísia",
+    "pontos": 1483.05
+  },
+  {
+    "pais": "Camarões",
+    "pontos": 1481.24
+  },
+  {
+    "pais": "República Democrática do Congo",
+    "pontos": 1478.35
+  },
+  {
+    "pais": "Grécia",
+    "pontos": 1475.82
+  },
+  {
+    "pais": "Eslováquia",
+    "pontos": 1473.94
+  },
+  {
+    "pais": "Venezuela",
+    "pontos": 1468.05
+  },
+  {
+    "pais": "Uzbequistão",
+    "pontos": 1465.34
+  },
+  {
+    "pais": "Costa Rica",
+    "pontos": 1459.90
+  },
+  {
+    "pais": "Mali",
+    "pontos": 1459.13
+  },
+  {
+    "pais": "Peru",
+    "pontos": 1455.87
+  },
+  {
+    "pais": "Chile",
+    "pontos": 1455.28
+  },
+  {
+    "pais": "Catar",
+    "pontos": 1454.96
+  },
+  {
+    "pais": "Romênia",
+    "pontos": 1451.16
+  },
+  {
+    "pais": "Iraque",
+    "pontos": 1447.14
+  },
+  {
+    "pais": "Eslovênia",
+    "pontos": 1446.44
+  },
+  {
+    "pais": "Irlanda",
+    "pontos": 1436.63
+  },
+  {
+    "pais": "África do Sul",
+    "pontos": 1429.73
+  },
+  {
+    "pais": "Arábia Saudita",
+    "pontos": 1421.43
+  },
+  {
+    "pais": "Burkina Faso",
+    "pontos": 1412.49
+  },
+  {
+    "pais": "Jordânia",
+    "pontos": 1391.45
+  },
+  {
+    "pais": "Albânia",
+    "pontos": 1388.06
+  },
+  {
+    "pais": "Bósnia e Herzegovina",
+    "pontos": 1385.84
+  },
+  {
+    "pais": "Honduras",
+    "pontos": 1380.27
+  },
+  {
+    "pais": "Macedônia do Norte",
+    "pontos": 1372.04
+  },
+  {
+    "pais": "Emirados Árabes Unidos",
+    "pontos": 1370.47
+  },
+  {
+    "pais": "Cabo Verde",
+    "pontos": 1366.13
+  },
+  {
+    "pais": "Irlanda do Norte",
+    "pontos": 1362.16
+  },
+  {
+    "pais": "Jamaica",
+    "pontos": 1358.00
+  },
+  {
+    "pais": "Geórgia",
+    "pontos": 1350.18
+  },
+  {
+    "pais": "Finlândia",
+    "pontos": 1346.41
+  },
+  {
+    "pais": "Gana",
+    "pontos": 1346.31
+  },
+  {
+    "pais": "Islândia",
+    "pontos": 1345.07
+  },
+  {
+    "pais": "Bolívia",
+    "pontos": 1329.42
+  },
+  {
+    "pais": "Israel",
+    "pontos": 1328.33
+  },
+  {
+    "pais": "Kosovo",
+    "pontos": 1318.83
+  },
+  {
+    "pais": "Omã",
+    "pontos": 1313.46
+  },
+  {
+    "pais": "Guiné",
+    "pontos": 1300.01
+  },
+  {
+    "pais": "Montenegro",
+    "pontos": 1295.52
+  },
+  {
+    "pais": "Curaçao",
+    "pontos": 1294.65
+  },
+  {
+    "pais": "Haiti",
+    "pontos": 1291.71
+  },
+  {
+    "pais": "Síria",
+    "pontos": 1288.56
+  },
+  {
+    "pais": "Nova Zelândia",
+    "pontos": 1281.57
+  },
+  {
+    "pais": "Bulgária",
+    "pontos": 1278.90
+  },
+  {
+    "pais": "Gabão",
+    "pontos": 1272.51
+  },
+  {
+    "pais": "Uganda",
+    "pontos": 1264.09
+  },
+  {
+    "pais": "Angola",
+    "pontos": 1263.10
+  },
+  {
+    "pais": "Benim",
+    "pontos": 1258.98
+  },
+  {
+    "pais": "Bahrein",
+    "pontos": 1258.53
+  },
+  {
+    "pais": "Zâmbia",
+    "pontos": 1255.82
+  },
+  {
+    "pais": "Tailândia",
+    "pontos": 1252.14
+  },
+  {
+    "pais": "China",
+    "pontos": 1251.60
+  },
+  {
+    "pais": "Palestina",
+    "pontos": 1244.73
+  },
+  {
+    "pais": "Guatemala",
+    "pontos": 1243.47
+  },
+  {
+    "pais": "Bielorrússia",
+    "pontos": 1235.82
+  },
+  {
+    "pais": "Luxemburgo",
+    "pontos": 1227.77
+  },
+  {
+    "pais": "Vietnã",
+    "pontos": 1225.68
+  },
+  {
+    "pais": "El Salvador",
+    "pontos": 1225.26
+  },
+  {
+    "pais": "Moçambique",
+    "pontos": 1224.31
+  },
+  {
+    "pais": "Trinidad e Tobago",
+    "pontos": 1222.94
+  },
+  {
+    "pais": "Tajiquistão",
+    "pontos": 1221.78
+  },
+  {
+    "pais": "Madagascar",
+    "pontos": 1203.76
+  },
+  {
+    "pais": "Guiné Equatorial",
+    "pontos": 1195.20
+  },
+  {
+    "pais": "Armênia",
+    "pontos": 1191.42
+  },
+  {
+    "pais": "Quirguistão",
+    "pontos": 1191.14
+  },
+  {
+    "pais": "Líbano",
+    "pontos": 1187.96
+  },
+  {
+    "pais": "Comores",
+    "pontos": 1187.91
+  },
+  {
+    "pais": "Cazaquistão",
+    "pontos": 1182.96
+  },
+  {
+    "pais": "Quênia",
+    "pontos": 1182.23
+  },
+  {
+    "pais": "Líbia",
+    "pontos": 1182.08
+  },
+  {
+    "pais": "Tanzânia",
+    "pontos": 1180.27
+  },
+  {
+    "pais": "Níger",
+    "pontos": 1179.66
+  },
+  {
+    "pais": "Mauritânia",
+    "pontos": 1170.72
+  },
+  {
+    "pais": "Gâmbia",
+    "pontos": 1160.38
+  },
+  {
+    "pais": "Sudão",
+    "pontos": 1157.22
+  },
+  {
+    "pais": "Coreia do Norte",
+    "pontos": 1151.05
+  },
+  {
+    "pais": "Serra Leoa",
+    "pontos": 1148.98
+  },
+  {
+    "pais": "Namíbia",
+    "pontos": 1148.84
+  },
+  {
+    "pais": "Togo",
+    "pontos": 1147.31
+  },
+  {
+    "pais": "Indonésia",
+    "pontos": 1144.88
+  },
+  {
+    "pais": "Ilhas Faroe",
+    "pontos": 1137.14
+  },
+  {
+    "pais": "Azerbaijão",
+    "pontos": 1136.67
+  },
+  {
+    "pais": "Suriname",
+    "pontos": 1132.43
+  },
+  {
+    "pais": "Chipre",
+    "pontos": 1128.33
+  },
+  {
+    "pais": "Malawi",
+    "pontos": 1128.03
+  },
+  {
+    "pais": "Ruanda",
+    "pontos": 1126.62
+  },
+  {
+    "pais": "Estônia",
+    "pontos": 1121.10
+  },
+  {
+    "pais": "Zimbábue",
+    "pontos": 1118.12
+  },
+  {
+    "pais": "Nicarágua",
+    "pontos": 1115.13
+  },
+  {
+    "pais": "Guiné-Bissau",
+    "pontos": 1108.38
+  },
+  {
+    "pais": "Congo",
+    "pontos": 1105.96
+  },
+  {
+    "pais": "Kuwait",
+    "pontos": 1105.10
+  },
+  {
+    "pais": "Filipinas",
+    "pontos": 1094.10
+  },
+  {
+    "pais": "Índia",
+    "pontos": 1091.03
+  },
+  {
+    "pais": "Letônia",
+    "pontos": 1090.57
+  },
+  {
+    "pais": "Malásia",
+    "pontos": 1086.22
+  },
+  {
+    "pais": "República Centro-Africana",
+    "pontos": 1083.57
+  },
+  {
+    "pais": "Libéria",
+    "pontos": 1079.02
+  },
+  {
+    "pais": "Turcomenistão",
+    "pontos": 1078.65
+  },
+  {
+    "pais": "Burundi",
+    "pontos": 1078.01
+  },
+  {
+    "pais": "Dominicana",
+    "pontos": 1077.95
+  },
+  {
+    "pais": "Etiópia",
+    "pontos": 1071.55
+  },
+  {
+    "pais": "Lesoto",
+    "pontos": 1067.13
+  },
+  {
+    "pais": "Botsuana",
+    "pontos": 1063.63
+  },
+  {
+    "pais": "Singapura",
+    "pontos": 1059.53
+  },
+  {
+    "pais": "Lituânia",
+    "pontos": 1058.42
+  },
+  {
+    "pais": "Iêmen",
+    "pontos": 1049.49
+  },
+  {
+    "pais": "Guiana",
+    "pontos": 1049.32
+  },
+  {
+    "pais": "Nova Caledônia",
+    "pontos": 1036.95
+  },
+  {
+    "pais": "São Cristóvão e Nevis",
+    "pontos": 1036.33
+  },
+  {
+    "pais": "Fiji",
+    "pontos": 1029.70
+  },
+  {
+    "pais": "Hong Kong (China)",
+    "pontos": 1026.63
+  },
+  {
+    "pais": "Porto Rico",
+    "pontos": 1026.11
+  },
+  {
+    "pais": "Taiti",
+    "pontos": 1019.04
+  },
+  {
+    "pais": "Myanmar",
+    "pontos": 1011.88
+  },
+  {
+    "pais": "Moldávia",
+    "pontos": 1004.16
+  },
+  {
+    "pais": "Vanuatu",
+    "pontos": 997.01
+  },
+  {
+    "pais": "Malta",
+    "pontos": 987.73
+  },
+  {
+    "pais": "Antígua e Barbuda",
+    "pontos": 986.58
+  },
+  {
+    "pais": "Granada",
+    "pontos": 982.57
+  },
+  {
+    "pais": "Cuba",
+    "pontos": 981.42
+  },
+  {
+    "pais": "Eswatini",
+    "pontos": 979.01
+  },
+  {
+    "pais": "Bermudas",
+    "pontos": 976.87
+  },
+  {
+    "pais": "Santa Lúcia",
+    "pontos": 976.71
+  },
+  {
+    "pais": "Papua-Nova Guiné",
+    "pontos": 974.90
+  },
+  {
+    "pais": "Afeganistão",
+    "pontos": 972.75
+  },
+  {
+    "pais": "Sudão do Sul",
+    "pontos": 970.94
+  },
+  {
+    "pais": "São Vicente e Granadinas",
+    "pontos": 968.27
+  },
+  {
+    "pais": "Maldivas",
+    "pontos": 954.93
+  },
+  {
+    "pais": "Andorra",
+    "pontos": 945.34
+  },
+  {
+    "pais": "Taiwan",
+    "pontos": 923.78
+  },
+  {
+    "pais": "Montserrat",
+    "pontos": 916.75
+  },
+  {
+    "pais": "Nepal",
+    "pontos": 914.54
+  },
+  {
+    "pais": "Camboja",
+    "pontos": 911.54
+  },
+  {
+    "pais": "Maurício",
+    "pontos": 911.49
+  },
+  {
+    "pais": "Barbados",
+    "pontos": 909.89
+  },
+  {
+    "pais": "Belize",
+    "pontos": 907.00
+  },
+  {
+    "pais": "Bangladesh",
+    "pontos": 899.53
+  },
+  {
+    "pais": "Dominica",
+    "pontos": 897.69
+  },
+  {
+    "pais": "Chade",
+    "pontos": 896.85
+  },
+  {
+    "pais": "Eritreia",
+    "pontos": 887.06
+  },
+  {
+    "pais": "Laos",
+    "pontos": 885.03
+  },
+  {
+    "pais": "Butão",
+    "pontos": 880.55
+  },
+  {
+    "pais": "Mongólia",
+    "pontos": 879.75
+  },
+  {
+    "pais": "Ilhas Cook",
+    "pontos": 877.53
+  },
+  {
+    "pais": "Aruba",
+    "pontos": 877.30
+  },
+  {
+    "pais": "Samoa",
+    "pontos": 876.41
+  },
+  {
+    "pais": "Samoa Americana",
+    "pontos": 871.61
+  },
+  {
+    "pais": "Brunei",
+    "pontos": 863.09
+  },
+  {
+    "pais": "Macau",
+    "pontos": 858.03
+  },
+  {
+    "pais": "Ilhas Cayman",
+    "pontos": 855.45
+  },
+  {
+    "pais": "São Tomé e Príncipe",
+    "pontos": 855.44
+  },
+  {
+    "pais": "Djibuti",
+    "pontos": 853.58
+  },
+  {
+    "pais": "Somália",
+    "pontos": 839.17
+  },
+  {
+    "pais": "Tonga",
+    "pontos": 835.64
+  },
+  {
+    "pais": "Timor-Leste",
+    "pontos": 825.64
+  },
+  {
+    "pais": "Guam",
+    "pontos": 825.43
+  },
+  {
+    "pais": "Paquistão",
+    "pontos": 824.60
+  },
+  {
+    "pais": "Gibraltar",
+    "pontos": 810.14
+  },
+  {
+    "pais": "Seicheles",
+    "pontos": 804.16
+  },
+  {
+    "pais": "Ilhas Turks e Caicos",
+    "pontos": 803.98
+  },
+  {
+    "pais": "Liechtenstein",
+    "pontos": 803.57
+  },
+  {
+    "pais": "Bahamas",
+    "pontos": 786.82
+  },
+  {
+    "pais": "Ilhas Virgens Britânicas",
+    "pontos": 782.14
+  },
+  {
+    "pais": "Ilhas Virgens Americanas",
+    "pontos": 779.76
+  },
+  {
+    "pais": "Anguila",
+    "pontos": 760.25
+  },
+  {
+    "pais": "San Marino",
+    "pontos": 726.33
+  }
+]

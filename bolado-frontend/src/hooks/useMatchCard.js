@@ -3,7 +3,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../services/api';
 import toast from 'react-hot-toast';
 
-export const useMatchCard = (match) => {
+export const useMatchCard = (match, onSuccess) => {
     const { user } = useAuthContext();
     const isAdmin = user?.IsAdmin === "True" || user?.IsAdmin === true || user?.role === 'Admin';
 
@@ -57,6 +57,7 @@ export const useMatchCard = (match) => {
             match.homeTeamScore = parseInt(homeScore);
             match.awayTeamScore = parseInt(awayScore);
             match.status = 2; // Assume finished
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error(error);
             toast.error('Erro ao atualizar. Tente novamente.');

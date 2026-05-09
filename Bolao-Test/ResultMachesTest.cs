@@ -42,7 +42,7 @@ public class ResultMachesTest
         var matchId = 1;
         var dto = new ResultUpdateDTOs { MachID = matchId, HomeTeamScore = 2, AwayTeamScore = 1 };
         var match = new MatchModel { Id = matchId };
-        var prediction = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 2, AwayTeamScore = 1, PointsGained = 0 };
+        var prediction = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 2, AwayTeamScore = 1, PointsGained = 0 };
         var predictions = new List<PredictionModel> { prediction };
 
         _matchesRepositoryMock.Setup(x => x.GetMatchAsync(matchId)).ReturnsAsync(match);
@@ -68,7 +68,7 @@ public class ResultMachesTest
         var match = new MatchModel { Id = matchId };
         
         // Prediction: Home wins 1-0 (Correct winner, wrong score)
-        var prediction = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 1, AwayTeamScore = 0, PointsGained = 0 };
+        var prediction = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 1, AwayTeamScore = 0, PointsGained = 0 };
         var predictions = new List<PredictionModel> { prediction };
 
         _matchesRepositoryMock.Setup(x => x.GetMatchAsync(matchId)).ReturnsAsync(match);
@@ -92,7 +92,7 @@ public class ResultMachesTest
         var match = new MatchModel { Id = matchId };
         
         // Prediction: Draw 0-0 (Correct result "Draw", wrong score)
-        var prediction = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 0, PointsGained = 0 };
+        var prediction = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 0, PointsGained = 0 };
         var predictions = new List<PredictionModel> { prediction };
 
         _matchesRepositoryMock.Setup(x => x.GetMatchAsync(matchId)).ReturnsAsync(match);
@@ -116,7 +116,7 @@ public class ResultMachesTest
         var match = new MatchModel { Id = matchId };
         
         // Prediction: Away wins 0-1
-        var prediction = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 1, PointsGained = 0 };
+        var prediction = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 1, PointsGained = 0 };
         var predictions = new List<PredictionModel> { prediction };
 
         _matchesRepositoryMock.Setup(x => x.GetMatchAsync(matchId)).ReturnsAsync(match);
@@ -139,9 +139,9 @@ public class ResultMachesTest
         var dto = new ResultUpdateDTOs { MachID = matchId, HomeTeamScore = 2, AwayTeamScore = 1 };
         var match = new MatchModel { Id = matchId };
 
-        var p1 = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 2, AwayTeamScore = 1, PointsGained = 0 }; // Exact score (3 pts)
-        var p2 = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 1, AwayTeamScore = 0, PointsGained = 0 }; // Correct winner (1 pt)
-        var p3 = new PredictionModel(Guid.NewGuid()) { MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 1, PointsGained = 0 }; // Wrong (0 pts)
+        var p1 = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 2, AwayTeamScore = 1, PointsGained = 0 }; // Exact score (3 pts)
+        var p2 = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 1, AwayTeamScore = 0, PointsGained = 0 }; // Correct winner (1 pt)
+        var p3 = new PredictionModel { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), MatchId = matchId, HomeTeamScore = 0, AwayTeamScore = 1, PointsGained = 0 }; // Wrong (0 pts)
 
         var predictions = new List<PredictionModel> { p1, p2, p3 };
 

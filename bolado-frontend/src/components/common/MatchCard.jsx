@@ -2,7 +2,7 @@ import React from 'react';
 import { Pencil, Save, X } from 'lucide-react';
 import { useMatchCard } from '../../hooks/useMatchCard';
 
-const MatchCard = ({ match }) => {
+const MatchCard = ({ match, onUpdate, stageName, matchIndex }) => {
     const {
         isAdmin,
         isEditing,
@@ -17,10 +17,60 @@ const MatchCard = ({ match }) => {
         formatTime,
         getTeamAbbr,
         getFlag
-    } = useMatchCard(match);
+    } = useMatchCard(match, onUpdate);
 
     // Helper for Group display
-    const groupName = match.homeTeam?.group || match.homeTeam?.Group || '-';
+    const rawGroupName = match.homeTeam?.group || match.homeTeam?.Group || '-';
+
+    // Letter to Number mapping for Knockout phases (Handles A=1, B=2... Q=17...)
+    const letterToNumber = (val) => {
+        if (!val || val === '-') return '-';
+        const str = val.toString().trim();
+        
+        // If it's a single letter, map A->1, B->2, etc.
+        if (str.length === 1) {
+            const code = str.toUpperCase().charCodeAt(0);
+            if (code >= 65 && code <= 90) return (code - 64).toString();
+        }
+        
+        // If it already contains numbers (e.g., "17" or "R32-17"), extract the number
+        const match = str.match(/\d+/);
+        if (match) return match[0];
+
+        return str;
+    };
+
+    const getMatchLabel = () => {
+        if (!stageName || stageName.toLowerCase().includes('fase de grupos')) {
+            return rawGroupName;
+        }
+
+        const lowerStage = stageName.toLowerCase();
+        
+        // Always use matchIndex for knockout stages to ensure sequential 1-16 numbering
+        const num = matchIndex || '-';
+
+        if (lowerStage.includes('segunda fase') || lowerStage.includes('32-avos')) {
+            return `Décima Sextas de Final ${num}`;
+        }
+        if (lowerStage.includes('oitavas')) {
+            return `Oitavas de Final ${num}`;
+        }
+        if (lowerStage.includes('quartas')) {
+            return `Quartas de Final ${num}`;
+        }
+        if (lowerStage.includes('semi')) {
+            return `Semifinal ${num}`;
+        }
+        if (lowerStage.includes('final')) {
+            return "Final";
+        }
+
+        return `${stageName} ${num}`;
+    };
+
+    const displayLabel = getMatchLabel();
+    const isKnockout = stageName && !stageName.toLowerCase().includes('fase de grupos');
 
     // Status check for live/finished
     const isFinished = match.status === 'Finished' || match.status === 2;
@@ -39,14 +89,21 @@ const MatchCard = ({ match }) => {
                 </button>
             )}
 
-            {/* Left: Group and Time */}
-            <div className="flex items-center gap-3 w-24">
-                {/* Group Badge */}
-                <div className="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold text-xs shrink-0" title={`Grupo ${groupName}`}>
-                    {groupName}
+            {/* Left: Phase/Group and Time */}
+            <div className={`flex flex-col gap-1 ${isKnockout ? 'min-w-[120px]' : 'w-24'}`}>
+                {/* Badge */}
+                <div 
+                    className={`flex items-center justify-center font-bold bg-gray-100 text-gray-600 shadow-sm ${
+                        isKnockout 
+                        ? 'px-2 py-1 rounded text-[9px] uppercase tracking-tighter text-center leading-tight' 
+                        : 'w-8 h-8 rounded-full text-xs'
+                    }`}
+                    title={displayLabel}
+                >
+                    {displayLabel}
                 </div>
                 {/* Time */}
-                <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">
+                <span className="text-[11px] font-semibold text-gray-400 whitespace-nowrap">
                     {formatTime(match.matchDate)}
                 </span>
             </div>

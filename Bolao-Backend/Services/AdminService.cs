@@ -3,6 +3,7 @@ using Bolao.Enum;
 using Bolao.Interfaces;
 using Bolao.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Bolao.Services;
 
 public class AdminService : IAdminService
 {

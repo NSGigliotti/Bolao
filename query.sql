@@ -1,0 +1,1 @@
+SELECT m.Id, m.HomeTeamId, h.Name AS Home, m.AwayTeamId, a.Name AS Away, m.HomeTeamScore, m.AwayTeamScore FROM Matches m JOIN Teams h ON m.HomeTeamId = h.Id JOIN Teams a ON m.AwayTeamId = a.Id WHERE h.\Group\ = 'K' OR a.\Group\ = 'K';

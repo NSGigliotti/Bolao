@@ -129,8 +129,8 @@ public class MachesController : ControllerBase
 
         try
         {
-          await _machesService.FinishPrediction(id);
-          return Ok();
+          var newUser = await _machesService.FinishPrediction(id);
+          return Ok(newUser);
         }
         catch (Exception ex)
         {

@@ -15,6 +15,11 @@ public class UserService : IUserService
 
     public async Task<LoginPayloadDTOs> RegisterUserAsync(CreateUserDTOs createUser)
     {
+        DateTime expirationDate = Bolao.Config.AppConfig.ExpirationDate;
+        DateTime currentDate = DateTime.Now;
+
+
+        if (currentDate > expirationDate) throw new Exception("Data Limite Excedida");
         if (string.IsNullOrWhiteSpace(createUser.Email)) throw new Exception("Email Necessário");
         if (await _userRepository.CheckEmailExist(createUser.Email)) throw new Exception("Email Já Utilizado");
         if (createUser.Password != createUser.ContirmPassword) throw new Exception("Senhas não correspondem");

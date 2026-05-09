@@ -173,6 +173,12 @@ public class MachesService : IMachesService
 
    public async Task<Guid> CreateAPrediction(MakePredictionDTOs predictionDto, Guid id)
 {
+    DateTime expirationDate = Bolao.Config.AppConfig.ExpirationDate;
+    DateTime currentDate = DateTime.Now;
+
+
+    if (currentDate > expirationDate) throw new Exception("Data Limite Excedida");
+
     if (predictionDto == null)  throw new Exception("Palpite inválido");
 
     // Se ainda quiser impedir duplicidade por jogo
@@ -202,18 +208,49 @@ public class MachesService : IMachesService
     return prediction.Id;
 }
 
-    public Task UpdatePrediction(UpdatePredicitionDTOS updatePredicition, Guid id)
+    public async Task UpdatePrediction(UpdatePredicitionDTOS updatePredicition, Guid id)
     {
-        throw new NotImplementedException();
+        DateTime expirationDate = Bolao.Config.AppConfig.ExpirationDate;
+        DateTime currentDate = DateTime.Now;
+
+
+        if (currentDate > expirationDate) throw new Exception("Data Limite Excedida");
+
+        if (updatePredicition == null) throw new Exception("Palpite inválido");
+        
+        var predictions = await _machesRepository.GetAllPedicitonById(id);
+        var prediction = predictions.FirstOrDefault(p => p.MatchId == updatePredicition.MachID);
+
+        if (prediction == null) throw new Exception("Palpite não encontrado");
+
+        var match = await _machesRepository.GetMatchAsync(updatePredicition.MachID);
+        if (match != null && match.Stage >= Bolao.Enum.MatchStage.RoundOf32 && updatePredicition.HomeTeamScore == updatePredicition.AwayTeamScore)
+        {
+            throw new Exception($"Empates não são permitidos em mata-mata ({match.Id})");
+        }
+
+        prediction.HomeTeamScore = updatePredicition.HomeTeamScore;
+        prediction.AwayTeamScore = updatePredicition.AwayTeamScore;
+        
+        // Update teams if provided (for knockout stages where they can change)
+        if (updatePredicition.HomeTeamId > 0) prediction.HomeTeamId = updatePredicition.HomeTeamId;
+        if (updatePredicition.AwayTeamId > 0) prediction.AwayTeamId = updatePredicition.AwayTeamId;
+
+        await _machesRepository.UpdatePredictionAsync(prediction);
     }
 
-    public async Task FinishPrediction(Guid id)
+    public async Task<LoginPayloadDTOs> FinishPrediction(Guid id)
     {
         var user = await _userRepository.GetUserFromID(id);
         user.GameMake = true;
         await _userRepository.UpdateUser(user);
 
-     var token = _userRepository.CreatToken(user);
+         var token = _userRepository.CreatToken(user);
+
+        LoginPayloadDTOs loginPayload = new LoginPayloadDTOs(name: user.Name, email: user.Email, token: token, gameMake: user.GameMake, payment: user.Status);
+
+
+         return loginPayload;
 
     }
 }

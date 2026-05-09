@@ -26,6 +26,7 @@ export const useGrups = () => {
 
     return {
         groups,
-        loading
+        loading,
+        refresh: fetchGroups
     };
 };

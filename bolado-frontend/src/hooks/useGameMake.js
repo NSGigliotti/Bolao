@@ -277,8 +277,13 @@ export const useGameMake = () => {
             });
 
             if (response.ok) {
+                const data = await response.json();
                 toast.success("Palpites finalizados com sucesso!");
-                updateUser({ GameMake: true });
+                if (data.token) {
+                    login(data.token);
+                } else {
+                    updateUser({ GameMake: true });
+                }
                 navigate('/mygame');
             } else {
                 toast.error("Erro ao finalizar palpites.");

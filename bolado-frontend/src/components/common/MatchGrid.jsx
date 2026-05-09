@@ -1,7 +1,7 @@
 import React from 'react';
 import MatchCard from './MatchCard';
 
-const MatchGrid = ({ title, matches }) => {
+const MatchGrid = ({ title, matches, onUpdate }) => {
     if (!matches || matches.length === 0) return null;
 
     return (
@@ -11,8 +11,14 @@ const MatchGrid = ({ title, matches }) => {
                 <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {matches.map((match) => (
-                    <MatchCard key={match.id} match={match} />
+                {matches.map((match, index) => (
+                    <MatchCard 
+                        key={match.id} 
+                        match={match} 
+                        onUpdate={onUpdate} 
+                        stageName={title} 
+                        matchIndex={index + 1} 
+                    />
                 ))}
             </div>
         </div>
