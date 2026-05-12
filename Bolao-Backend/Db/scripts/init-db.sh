@@ -10,10 +10,10 @@ done
 
 echo "MySQL pronto. Aguardando a tabela 'Teams' (migrations)..."
 
-# Loop de espera pela tabela
+# Loop de espera pela tabela e suas colunas finais
 MAX_RETRIES=30
 COUNT=0
-until mysql -h"db" -u"${MYSQL_USER}" --default-character-set=utf8mb4 "${MYSQL_DATABASE}" -sse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${MYSQL_DATABASE}' AND table_name = 'Teams';" | grep -q "1"; do
+until mysql -h"db" -u"${MYSQL_USER}" --default-character-set=utf8mb4 "${MYSQL_DATABASE}" -sse "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = '${MYSQL_DATABASE}' AND table_name = 'Teams' AND column_name = 'YellowCards';" | grep -q "1"; do
   COUNT=$((COUNT+1))
   if [ $COUNT -ge $MAX_RETRIES ]; then exit 1; fi
   sleep 2

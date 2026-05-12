@@ -22,33 +22,79 @@ public class TeamTrace
 
 public class MachesValidate
 {
-    // Round of 32 pairings based on GE/Globo (Official FIFA 2026 Bracket)
-    // Matches 73 to 88
+    // =====================================================================================
+    // Round of 32 - BRACKET OFICIAL FIFA 2026 (Regulamento, Anexo C)
+    // =====================================================================================
+    // Jogos 73-88: 16 jogos dos 32-avos de final
+    // Fonte: FIFA World Cup 2026 Competition Regulations + Wikipedia knockout stage
+    //
+    // ESTRUTURA:
+    //   - 8 jogos entre 1º/2º colocados (sem terceiros)
+    //   - 8 jogos envolvendo terceiros colocados (1º de grupo vs 3º)
+    //
+    // NUMERAÇÃO OFICIAL DOS JOGOS:
+    //   73: 2A vs 2B           74: 1E vs 3rd(ABCDF)
+    //   75: 1F vs 2C           76: 1C vs 2F
+    //   77: 1I vs 3rd(CDFGH)   78: 2E vs 2I
+    //   79: 1A vs 3rd(CEFHI)   80: 1L vs 3rd(EHIJK)
+    //   81: 1D vs 3rd(BEFIJ)   82: 1G vs 3rd(AEHIJ)
+    //   83: 2K vs 2L           84: 1H vs 2J
+    //   85: 1B vs 3rd(EFGIJ)   86: 1K vs 3rd(DEIJL)
+    //   87: 1J vs 2H           88: 2D vs 2G
+    // =====================================================================================
     private static readonly Dictionary<int, (string Home, string Away)> R32Pairings = new()
     {
-        { 73, ("E1", "3rd_ABCDF") }, { 74, ("I1", "3rd_CDFGH") }, { 75, ("A2", "B2") },    { 76, ("F1", "C2") },
-        { 77, ("K2", "L2") },        { 78, ("H1", "J2") },        { 79, ("D1", "3rd_BEFIJ") }, { 80, ("G1", "3rd_AEHIJ") },
-        { 81, ("C1", "F2") },        { 82, ("E2", "I2") },        { 83, ("A1", "3rd_CEFHI") }, { 84, ("L1", "3rd_EHIJK") },
-        { 85, ("J1", "H2") },        { 86, ("D2", "G2") },        { 87, ("B1", "3rd_EFGIJ") }, { 88, ("K1", "3rd_DEIJL") }
+        { 73, ("A2", "B2") },         { 74, ("E1", "3rd_ABCDF") },
+        { 75, ("F1", "C2") },         { 76, ("C1", "F2") },
+        { 77, ("I1", "3rd_CDFGH") },  { 78, ("E2", "I2") },
+        { 79, ("A1", "3rd_CEFHI") },  { 80, ("L1", "3rd_EHIJK") },
+        { 81, ("D1", "3rd_BEFIJ") },  { 82, ("G1", "3rd_AEHIJ") },
+        { 83, ("K2", "L2") },         { 84, ("H1", "J2") },
+        { 85, ("B1", "3rd_EFGIJ") },  { 86, ("J1", "H2") },
+        { 87, ("K1", "3rd_DEIJL") },  { 88, ("D2", "G2") }
     };
 
     // Sequential bracket progression for R16, QF, SF, and Final
     private static readonly Dictionary<int, (string Home, string Away)> KnockoutFixedMapping = new()
     {
-        // Round of 16 (89-96)
-        { 89, ("W73", "W74") }, { 90, ("W75", "W76") }, { 91, ("W77", "W78") }, { 92, ("W79", "W80") },
-        { 93, ("W81", "W82") }, { 94, ("W83", "W84") }, { 95, ("W85", "W86") }, { 96, ("W87", "W88") },
+        // Round of 16 (89-96) - Cruzamento Vertical (1 vs 3, 2 vs 4...)
+        { 89, ("W73", "W75") }, { 90, ("W74", "W76") }, { 91, ("W77", "W79") }, { 92, ("W78", "W80") },
+        { 93, ("W81", "W83") }, { 94, ("W82", "W84") }, { 95, ("W85", "W87") }, { 96, ("W86", "W88") },
         // Quarter-Finals (97-100)
-        { 97, ("W89", "W90") }, { 98, ("W91", "W92") }, { 99, ("W93", "W94") }, { 100, ("W95", "W96") },
+        { 97, ("W89", "W91") }, { 98, ("W90", "W92") }, { 99, ("W93", "W95") }, { 100, ("W94", "W96") },
         // Semi-Finals (101-102)
-        { 101, ("W97", "W98") }, { 102, ("W99", "W100") },
+        { 101, ("W97", "W99") }, { 102, ("W98", "W100") },
         // Third Place and Final
         { 103, ("L101", "L102") }, { 104, ("W101", "W102") }
     };
 
+    private static string RemoveDiacritics(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return text;
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
     private static double GetFifaRanking(string teamName)
     {
-        return Bolao.Config.FifaRankingsConfig.Points.TryGetValue(teamName, out double points) ? points : 0.0;
+        if (string.IsNullOrWhiteSpace(teamName)) return 0.0;
+        
+        var normalizedInput = RemoveDiacritics(teamName.Trim()).ToLowerInvariant();
+
+        // Fazemos uma busca ignorando acentos e maiúsculas/minúsculas no dicionário
+        var match = Bolao.Config.FifaRankingsConfig.Points.FirstOrDefault(x => RemoveDiacritics(x.Key).ToLowerInvariant() == normalizedInput);
+        
+        return match.Value > 0 ? match.Value : 0.0;
     }
 
     public async Task SeedTournament(IMachesRepository repository, BolaoDbContext context)
@@ -231,8 +277,50 @@ public class MachesValidate
         foreach (var m in groupMatchesFinished) UpdateStatsFromMatch(m, allTeams);
 
         var groupStandings = CalculateGroupStandings(allTeams, groupMatchesFinished);
+
+        Console.WriteLine("\n[DEBUG] === RANKING DOS 12 TERCEIROS COLOCADOS (Para seleção dos 8 melhores) ===");
+        Console.WriteLine("| Grupo | Seleção              | Pts | SG  | GP  | Fair Play | Ranking FIFA |");
+        Console.WriteLine("|-------|-----------------------|-----|-----|-----|-----------|--------------|" );
+        var allThirdsDebug = groupStandings.Values
+            .Select(g => g.ElementAtOrDefault(2))
+            .Where(t => t != null)
+            .OrderByDescending(t => t!.Points)
+            .ThenByDescending(t => t!.GoalDifference)
+            .ThenByDescending(t => t!.GoalsFor)
+            .ThenByDescending(t => (t!.YellowCards * -1) + (t!.RedCards * -3))
+            .ThenByDescending(t => GetFifaRanking(t!.Name))
+            .ToList();
+            
+        for (int i = 0; i < allThirdsDebug.Count; i++)
+        {
+            var t = allThirdsDebug[i]!;
+            var rank = GetFifaRanking(t.Name);
+            var fairPlay = (t.YellowCards * -1) + (t.RedCards * -3);
+            var marker = i < 8 ? "✅" : "❌";
+            Console.WriteLine($"| {marker} {t.Group}  | {t.Name,-21} | {t.Points,3} | {t.GoalDifference,3} | {t.GoalsFor,3} | {fairPlay,9} | {rank,12:F2} |");
+        }
+
         var bestThirds = GetBestThirds(groupStandings);
+
+        // === RESOLUÇÃO DOS CONFRONTOS DOS TERCEIROS ===
         var assignedThirds = AssignThirdPlaceTeams(bestThirds);
+
+        // === DEBUG: Mostrar atribuição dos terceiros aos jogos ===
+        Console.WriteLine("\n[DEBUG] === ATRIBUIÇÃO DOS TERCEIROS AOS JOGOS DO R32 ===");
+        var slotsForDebug = new (int MatchId, string AllowedGroups)[]
+        {
+            (74, "ABCDF"), (77, "CDFGH"), (79, "CEFHI"), (80, "EHIJK"),
+            (81, "BEFIJ"), (82, "AEHIJ"), (85, "EFGIJ"), (87, "DEIJL")
+        };
+        foreach (var (matchId, allowed) in slotsForDebug)
+        {
+            var pairing = R32Pairings[matchId];
+            var homeCode = pairing.Home;
+            var homeGroup = homeCode[0];
+            var homeTeam = groupStandings.TryGetValue(homeGroup, out var hs) ? hs.FirstOrDefault()?.Name ?? "?" : "?";
+            var thirdTeam = assignedThirds.TryGetValue(matchId, out var tt) ? $"{tt.Name} (3º Grupo {tt.Group})" : "NÃO ATRIBUÍDO";
+            Console.WriteLine($"  Jogo {matchId}: {homeTeam} (1º{homeGroup}) vs {thirdTeam}  [permitidos: {allowed}]");
+        }
 
         var knockoutMatches = allMatches.Where(m => m.Id >= 73).OrderBy(m => m.Id).ToList();
         foreach (var match in knockoutMatches)
@@ -240,8 +328,8 @@ public class MachesValidate
             if (match.Id <= 88)
             {
                 var rule = R32Pairings[match.Id];
-                match.HomeTeamId = ResolveSlot(rule.Home, groupStandings, assignedThirds).Id;
-                match.AwayTeamId = ResolveSlot(rule.Away, groupStandings, assignedThirds).Id;
+                match.HomeTeamId = ResolveSlot(rule.Home, groupStandings, assignedThirds)?.Id;
+                match.AwayTeamId = ResolveSlot(rule.Away, groupStandings, assignedThirds)?.Id;
             }
             else
             {
@@ -260,32 +348,43 @@ public class MachesValidate
         foreach (var t in allTeams) await repository.UpdateTeam(t);
     }
 
+    /// <summary>
+    /// Atribui os 8 melhores terceiros colocados aos seus respectivos jogos do R32.
+    /// Segue a ordem de prioridade para os jogos 74, 77, 79, 80, 81, 82, 85, 87.
+    /// </summary>
     private Dictionary<int, TeamModel> AssignThirdPlaceTeams(List<TeamModel> bestThirds)
     {
         var result = new Dictionary<int, TeamModel>();
-        var availableThirds = new List<TeamModel>(bestThirds.OrderBy(t => t.Group));
-        
-        var slots = new Dictionary<int, string>
+        var availableThirds = new List<TeamModel>(bestThirds);
+
+        var slots = new (int MatchId, string AllowedGroups)[]
         {
-            { 73, "ABCDF" }, { 74, "CDFGH" }, { 79, "BEFIJ" }, { 80, "AEHIJ" },
-            { 83, "CEFHI" }, { 84, "EHIJK" }, { 87, "EFGIJ" }, { 88, "DEIJL" }
+            (74, "ABCDF"),
+            (77, "CDFGH"),
+            (79, "CEFHI"),
+            (80, "EHIJK"),
+            (81, "BEFIJ"),
+            (82, "AEHIJ"),
+            (85, "EFGIJ"),
+            (87, "DEIJL")
         };
 
-        foreach (var slot in slots)
+        foreach (var (matchId, allowedGroups) in slots)
         {
-            var team = availableThirds.FirstOrDefault(t => slot.Value.Contains(t.Group));
+            var team = availableThirds.FirstOrDefault(t => allowedGroups.Contains(t.Group));
             if (team != null)
             {
-                result[slot.Key] = team;
+                result[matchId] = team;
                 availableThirds.Remove(team);
             }
         }
 
-        foreach (var slot in slots.Keys.Where(k => !result.ContainsKey(k)))
+        // Preencher slots restantes com terceiros disponíveis (fallback)
+        foreach (var (matchId, _) in slots.Where(s => !result.ContainsKey(s.MatchId)))
         {
             if (availableThirds.Any())
             {
-                result[slot] = availableThirds[0];
+                result[matchId] = availableThirds[0];
                 availableThirds.RemoveAt(0);
             }
         }
@@ -293,17 +392,19 @@ public class MachesValidate
         return result;
     }
 
-    private TeamModel ResolveSlot(string code, Dictionary<char, List<TeamModel>> groupStandings, Dictionary<int, TeamModel> assignedThirds)
+    private TeamModel? ResolveSlot(string code, Dictionary<char, List<TeamModel>> groupStandings, Dictionary<int, TeamModel> assignedThirds)
     {
         if (code.StartsWith("3rd_"))
         {
             var matchId = R32Pairings.FirstOrDefault(p => p.Value.Home == code || p.Value.Away == code).Key;
-            return assignedThirds.ContainsKey(matchId) ? assignedThirds[matchId] : null;
+            return assignedThirds.TryGetValue(matchId, out var team) ? team : null;
         }
 
         char groupLetter = code[0];
         int pos = int.Parse(code[1].ToString());
-        return groupStandings[groupLetter].ElementAtOrDefault(pos - 1);
+        return groupStandings.TryGetValue(groupLetter, out var standing)
+            ? standing.ElementAtOrDefault(pos - 1)
+            : null;
     }
 
     public async Task SimulateMatch(MatchModel match, Random random, bool allowDraw = true)
@@ -372,6 +473,12 @@ public class MachesValidate
         return sorted;
     }
 
+    private static bool IsHostNation(string teamName)
+    {
+        var normalized = RemoveDiacritics(teamName).ToLowerInvariant();
+        return normalized == "mexico" || normalized == "estados unidos" || normalized == "canada";
+    }
+
     private List<TeamModel> ResolveTiedTeams(List<TeamModel> tiedTeams, List<MatchModel> groupMatches)
     {
         if (tiedTeams.Count <= 1) return tiedTeams;
@@ -396,29 +503,42 @@ public class MachesValidate
         }
         
         return tiedTeams
-            // PRIMEIRO PASSO: Confronto Direto
-            .OrderByDescending(t => stats[t.Id].Points)          // maior número de pontos (confronto direto)
+            // PASSO 1: Geral no Grupo (Prioridade FIFA moderna)
+            .OrderByDescending(t => t.GoalDifference)             // melhor saldo de gols (todas as partidas)
+            .ThenByDescending(t => t.GoalsFor)                   // maior número de gols (todas as partidas)
+            .ThenByDescending(t => t.Wins)                       // maior número de vitórias (todas as partidas)
+            // PASSO 2: Confronto Direto (Se persistir o empate)
+            .ThenByDescending(t => stats[t.Id].Points)          // maior número de pontos (confronto direto)
             .ThenByDescending(t => stats[t.Id].GoalDifference)   // saldo de gols (confronto direto)
             .ThenByDescending(t => stats[t.Id].GoalsFor)         // gols marcados (confronto direto)
-            // SEGUNDO PASSO: Geral no Grupo
-            .ThenByDescending(t => t.GoalDifference)             // melhor saldo de gols (todas as partidas)
-            .ThenByDescending(t => t.GoalsFor)                   // maior número de gols (todas as partidas)
-            // TERCEIRO PASSO: Ranking da FIFA
-            .ThenByDescending(t => GetFifaRanking(t.Name))       // ranking mais recente da FIFA (pontos: maior é melhor)
+            // PASSO 3: Fair Play
+            .ThenByDescending(t => (t.YellowCards * -1) + (t.RedCards * -3))
+            // PASSO 4: Prioridade para Países Sedes (México, EUA, Canadá) no início
+            .ThenByDescending(t => IsHostNation(t.Name) ? 1 : 0)
+            // PASSO 5: Ranking da FIFA
+            .ThenByDescending(t => GetFifaRanking(t.Name))       // ranking mais recente da FIFA (maior é melhor)
             .ToList();
     }
 
+    /// <summary>
+    /// Seleciona e ordena os 8 melhores terceiros colocados segundo os critérios de desempate.
+    /// 1. Pontos, 2. Saldo, 3. Gols Pró, 4. Fair Play, 5. Ranking FIFA
+    /// </summary>
     private List<TeamModel> GetBestThirds(Dictionary<char, List<TeamModel>> standings)
     {
-        // Definição dos oito melhores terceiros colocados:
-        return standings.Values.Select(g => g.ElementAtOrDefault(2))
+        var allThirds = standings.Values
+            .Select(g => g.ElementAtOrDefault(2))
             .Where(t => t != null)
-            .OrderByDescending(t => t!.Points)                   // 1. maior número de pontos obtidos em todas as partidas do grupo
-            .ThenByDescending(t => t!.GoalDifference)            // 2. saldo de gols resultante de todas as partidas do grupo
-            .ThenByDescending(t => t!.GoalsFor)                  // 3. maior número de gols marcados em todas as partidas do grupo
-            .ThenByDescending(t => GetFifaRanking(t!.Name))      // 4. classificação de acordo com o Ranking da FIFA
-            .Take(8)
             .Cast<TeamModel>()
+            .ToList();
+
+        return allThirds
+            .OrderByDescending(t => t.Points)
+            .ThenByDescending(t => t.GoalDifference)
+            .ThenByDescending(t => t.GoalsFor)
+            .ThenByDescending(t => (t.YellowCards * -1) + (t.RedCards * -3))
+            .ThenByDescending(t => GetFifaRanking(t.Name))
+            .Take(8)
             .ToList();
     }
 

@@ -2,68 +2,68 @@
 -- Versao Definitiva: Times e datas oficiais (Horario de Brasilia - GMT-3)
 
 -- 1. POPULAR SELECOES (48 TIMES)
-INSERT INTO Teams (Name, Abbreviation, `Group`, FlagUrl, Points, GamesPlayed, Wins, Draws, Losses, GoalsFor, GoalsAgainst)
+INSERT INTO Teams (Name, Abbreviation, `Group`, FlagUrl, Points, GamesPlayed, Wins, Draws, Losses, GoalsFor, GoalsAgainst, YellowCards, RedCards)
 VALUES
 -- Grupo A
-('Mexico', 'MEX', 'A', 'https://flagcdn.com/w320/mx.png', 0, 0, 0, 0, 0, 0, 0),
-('Africa do Sul', 'RSA', 'A', 'https://flagcdn.com/w320/za.png', 0, 0, 0, 0, 0, 0, 0),
-('Coreia do Sul', 'KOR', 'A', 'https://flagcdn.com/w320/kr.png', 0, 0, 0, 0, 0, 0, 0),
-('Republica Tcheca', 'CZE', 'A', 'https://flagcdn.com/w320/cz.png', 0, 0, 0, 0, 0, 0, 0),
+('Mexico', 'MEX', 'A', 'https://flagcdn.com/w320/mx.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Africa do Sul', 'RSA', 'A', 'https://flagcdn.com/w320/za.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Coreia do Sul', 'KOR', 'A', 'https://flagcdn.com/w320/kr.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Republica Tcheca', 'CZE', 'A', 'https://flagcdn.com/w320/cz.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo B
-('Canada', 'CAN', 'B', 'https://flagcdn.com/w320/ca.png', 0, 0, 0, 0, 0, 0, 0),
-('Bosnia e Herzegovina', 'BIH', 'B', 'https://flagcdn.com/w320/ba.png', 0, 0, 0, 0, 0, 0, 0),
-('Catar', 'QAT', 'B', 'https://flagcdn.com/w320/qa.png', 0, 0, 0, 0, 0, 0, 0),
-('Suica', 'SUI', 'B', 'https://flagcdn.com/w320/ch.png', 0, 0, 0, 0, 0, 0, 0),
+('Canada', 'CAN', 'B', 'https://flagcdn.com/w320/ca.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Bosnia e Herzegovina', 'BIH', 'B', 'https://flagcdn.com/w320/ba.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Catar', 'QAT', 'B', 'https://flagcdn.com/w320/qa.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Suica', 'SUI', 'B', 'https://flagcdn.com/w320/ch.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo C
-('Brasil', 'BRA', 'C', 'https://flagcdn.com/w320/br.png', 0, 0, 0, 0, 0, 0, 0),
-('Marrocos', 'MAR', 'C', 'https://flagcdn.com/w320/ma.png', 0, 0, 0, 0, 0, 0, 0),
-('Haiti', 'HAI', 'C', 'https://flagcdn.com/w320/ht.png', 0, 0, 0, 0, 0, 0, 0),
-('Escocia', 'SCO', 'C', 'https://flagcdn.com/w320/gb-sct.png', 0, 0, 0, 0, 0, 0, 0),
+('Brasil', 'BRA', 'C', 'https://flagcdn.com/w320/br.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Marrocos', 'MAR', 'C', 'https://flagcdn.com/w320/ma.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Haiti', 'HAI', 'C', 'https://flagcdn.com/w320/ht.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Escocia', 'SCO', 'C', 'https://flagcdn.com/w320/gb-sct.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo D
-('Estados Unidos', 'USA', 'D', 'https://flagcdn.com/w320/us.png', 0, 0, 0, 0, 0, 0, 0),
-('Paraguai', 'PAR', 'D', 'https://flagcdn.com/w320/py.png', 0, 0, 0, 0, 0, 0, 0),
-('Australia', 'AUS', 'D', 'https://flagcdn.com/w320/au.png', 0, 0, 0, 0, 0, 0, 0),
-('Turquia', 'TUR', 'D', 'https://flagcdn.com/w320/tr.png', 0, 0, 0, 0, 0, 0, 0),
+('Estados Unidos', 'USA', 'D', 'https://flagcdn.com/w320/us.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Paraguai', 'PAR', 'D', 'https://flagcdn.com/w320/py.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Australia', 'AUS', 'D', 'https://flagcdn.com/w320/au.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Turquia', 'TUR', 'D', 'https://flagcdn.com/w320/tr.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo E
-('Alemanha', 'GER', 'E', 'https://flagcdn.com/w320/de.png', 0, 0, 0, 0, 0, 0, 0),
-('Curacao', 'CUW', 'E', 'https://flagcdn.com/w320/cw.png', 0, 0, 0, 0, 0, 0, 0),
-('Costa do Marfim', 'CIV', 'E', 'https://flagcdn.com/w320/ci.png', 0, 0, 0, 0, 0, 0, 0),
-('Equador', 'ECU', 'E', 'https://flagcdn.com/w320/ec.png', 0, 0, 0, 0, 0, 0, 0),
+('Alemanha', 'GER', 'E', 'https://flagcdn.com/w320/de.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Curacao', 'CUW', 'E', 'https://flagcdn.com/w320/cw.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Costa do Marfim', 'CIV', 'E', 'https://flagcdn.com/w320/ci.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Equador', 'ECU', 'E', 'https://flagcdn.com/w320/ec.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo F
-('Paises Baixos', 'NED', 'F', 'https://flagcdn.com/w320/nl.png', 0, 0, 0, 0, 0, 0, 0),
-('Japao', 'JPN', 'F', 'https://flagcdn.com/w320/jp.png', 0, 0, 0, 0, 0, 0, 0),
-('Suecia', 'SWE', 'F', 'https://flagcdn.com/w320/se.png', 0, 0, 0, 0, 0, 0, 0),
-('Tunisia', 'TUN', 'F', 'https://flagcdn.com/w320/tn.png', 0, 0, 0, 0, 0, 0, 0),
+('Paises Baixos', 'NED', 'F', 'https://flagcdn.com/w320/nl.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Japao', 'JPN', 'F', 'https://flagcdn.com/w320/jp.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Suecia', 'SWE', 'F', 'https://flagcdn.com/w320/se.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Tunisia', 'TUN', 'F', 'https://flagcdn.com/w320/tn.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo G
-('Belgica', 'BEL', 'G', 'https://flagcdn.com/w320/be.png', 0, 0, 0, 0, 0, 0, 0),
-('Egito', 'EGY', 'G', 'https://flagcdn.com/w320/eg.png', 0, 0, 0, 0, 0, 0, 0),
-('Ira', 'IRN', 'G', 'https://flagcdn.com/w320/ir.png', 0, 0, 0, 0, 0, 0, 0),
-('Nova Zelandia', 'NZL', 'G', 'https://flagcdn.com/w320/nz.png', 0, 0, 0, 0, 0, 0, 0),
+('Belgica', 'BEL', 'G', 'https://flagcdn.com/w320/be.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Egito', 'EGY', 'G', 'https://flagcdn.com/w320/eg.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Ira', 'IRN', 'G', 'https://flagcdn.com/w320/ir.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Nova Zelandia', 'NZL', 'G', 'https://flagcdn.com/w320/nz.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo H
-('Espanha', 'ESP', 'H', 'https://flagcdn.com/w320/es.png', 0, 0, 0, 0, 0, 0, 0),
-('Cabo Verde', 'CPV', 'H', 'https://flagcdn.com/w320/cv.png', 0, 0, 0, 0, 0, 0, 0),
-('Arabia Saudita', 'KSA', 'H', 'https://flagcdn.com/w320/sa.png', 0, 0, 0, 0, 0, 0, 0),
-('Uruguai', 'URU', 'H', 'https://flagcdn.com/w320/uy.png', 0, 0, 0, 0, 0, 0, 0),
+('Espanha', 'ESP', 'H', 'https://flagcdn.com/w320/es.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Cabo Verde', 'CPV', 'H', 'https://flagcdn.com/w320/cv.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Arabia Saudita', 'KSA', 'H', 'https://flagcdn.com/w320/sa.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Uruguai', 'URU', 'H', 'https://flagcdn.com/w320/uy.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo I
-('Franca', 'FRA', 'I', 'https://flagcdn.com/w320/fr.png', 0, 0, 0, 0, 0, 0, 0),
-('Senegal', 'SEN', 'I', 'https://flagcdn.com/w320/sn.png', 0, 0, 0, 0, 0, 0, 0),
-('Iraque', 'IRQ', 'I', 'https://flagcdn.com/w320/iq.png', 0, 0, 0, 0, 0, 0, 0),
-('Noruega', 'NOR', 'I', 'https://flagcdn.com/w320/no.png', 0, 0, 0, 0, 0, 0, 0),
+('Franca', 'FRA', 'I', 'https://flagcdn.com/w320/fr.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Senegal', 'SEN', 'I', 'https://flagcdn.com/w320/sn.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Iraque', 'IRQ', 'I', 'https://flagcdn.com/w320/iq.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Noruega', 'NOR', 'I', 'https://flagcdn.com/w320/no.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo J
-('Argentina', 'ARG', 'J', 'https://flagcdn.com/w320/ar.png', 0, 0, 0, 0, 0, 0, 0),
-('Argelia', 'ALG', 'J', 'https://flagcdn.com/w320/dz.png', 0, 0, 0, 0, 0, 0, 0),
-('Austria', 'AUT', 'J', 'https://flagcdn.com/w320/at.png', 0, 0, 0, 0, 0, 0, 0),
-('Jordania', 'JOR', 'J', 'https://flagcdn.com/w320/jo.png', 0, 0, 0, 0, 0, 0, 0),
+('Argentina', 'ARG', 'J', 'https://flagcdn.com/w320/ar.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Argelia', 'ALG', 'J', 'https://flagcdn.com/w320/dz.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Austria', 'AUT', 'J', 'https://flagcdn.com/w320/at.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Jordania', 'JOR', 'J', 'https://flagcdn.com/w320/jo.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo K
-('Portugal', 'POR', 'K', 'https://flagcdn.com/w320/pt.png', 0, 0, 0, 0, 0, 0, 0),
-('RD Congo', 'COD', 'K', 'https://flagcdn.com/w320/cd.png', 0, 0, 0, 0, 0, 0, 0),
-('Uzbequistao', 'UZB', 'K', 'https://flagcdn.com/w320/uz.png', 0, 0, 0, 0, 0, 0, 0),
-('Colombia', 'COL', 'K', 'https://flagcdn.com/w320/co.png', 0, 0, 0, 0, 0, 0, 0),
+('Portugal', 'POR', 'K', 'https://flagcdn.com/w320/pt.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('RD Congo', 'COD', 'K', 'https://flagcdn.com/w320/cd.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Uzbequistao', 'UZB', 'K', 'https://flagcdn.com/w320/uz.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Colombia', 'COL', 'K', 'https://flagcdn.com/w320/co.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
 -- Grupo L
-('Inglaterra', 'ENG', 'L', 'https://flagcdn.com/w320/gb-eng.png', 0, 0, 0, 0, 0, 0, 0),
-('Croacia', 'CRO', 'L', 'https://flagcdn.com/w320/hr.png', 0, 0, 0, 0, 0, 0, 0),
-('Gana', 'GHA', 'L', 'https://flagcdn.com/w320/gh.png', 0, 0, 0, 0, 0, 0, 0),
-('Panama', 'PAN', 'L', 'https://flagcdn.com/w320/pa.png', 0, 0, 0, 0, 0, 0, 0);
+('Inglaterra', 'ENG', 'L', 'https://flagcdn.com/w320/gb-eng.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Croacia', 'CRO', 'L', 'https://flagcdn.com/w320/hr.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Gana', 'GHA', 'L', 'https://flagcdn.com/w320/gh.png', 0, 0, 0, 0, 0, 0, 0, 0, 0),
+('Panama', 'PAN', 'L', 'https://flagcdn.com/w320/pa.png', 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- 2. POPULAR JOGOS DA FASE DE GRUPOS (72 JOGOS)
 -- Nota: 'Stage' 0=Rodada 1, 1=Rodada 2, 2=Rodada 3

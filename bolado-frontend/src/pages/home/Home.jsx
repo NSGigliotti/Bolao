@@ -183,6 +183,12 @@ const GroupBlock = ({ group, stageGroups, onUpdate }) => {
                                     <th className="px-2 py-3 lg:py-4 font-bold text-gray-400 text-center w-8">GP</th>
                                     <th className="px-2 py-3 lg:py-4 font-bold text-gray-400 text-center w-8">GC</th>
                                     <th className="px-2 py-3 lg:py-4 font-black text-gray-900 text-center w-10 bg-gray-50/50">SG</th>
+                                    <th className="px-2 py-3 lg:py-4 font-medium text-gray-500 text-center w-8">
+                                        <div className="w-2.5 h-3.5 bg-yellow-400 mx-auto rounded-[1px] shadow-sm" title="Cartões Amarelos"></div>
+                                    </th>
+                                    <th className="px-2 py-3 lg:py-4 font-medium text-gray-500 text-center w-8">
+                                        <div className="w-2.5 h-3.5 bg-red-500 mx-auto rounded-[1px] shadow-sm" title="Cartões Vermelhos"></div>
+                                    </th>
                                     <th className="px-2 py-3 lg:py-4 font-bold text-gray-400 text-center w-12 text-[9px]">%</th>
                                 </tr>
                             </thead>
@@ -211,6 +217,8 @@ const GroupBlock = ({ group, stageGroups, onUpdate }) => {
                                         <td className={`px-2 py-4 text-center font-black text-[13px] bg-gray-50/20 ${team.goalDifference > 0 ? 'text-emerald-600' : team.goalDifference < 0 ? 'text-rose-500' : 'text-gray-400'}`}>
                                             {team.goalDifference}
                                         </td>
+                                        <td className="px-2 py-4 text-center text-gray-500 font-bold">{team.yellowCards || 0}</td>
+                                        <td className="px-2 py-4 text-center text-red-600 font-bold">{team.redCards || 0}</td>
                                         <td className="px-2 py-4 text-center text-gray-400 font-black text-[10px] italic">
                                             {calculateEfficiency(team.points, team.gamesPlayed)}%
                                         </td>

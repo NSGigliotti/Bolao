@@ -53,6 +53,12 @@ const GrupsPage = () => {
                                             <th className="px-3 py-3 font-medium text-gray-500 text-center w-10 hidden sm:table-cell">GP</th>
                                             <th className="px-3 py-3 font-medium text-gray-500 text-center w-10 hidden sm:table-cell">GC</th>
                                             <th className="px-3 py-3 font-medium text-gray-500 text-center w-12 hidden sm:table-cell">SG</th>
+                                            <th className="px-2 py-3 font-medium text-gray-500 text-center w-8">
+                                                <div className="w-3 h-4 bg-yellow-400 mx-auto rounded-[1px] shadow-sm" title="Cartões Amarelos"></div>
+                                            </th>
+                                            <th className="px-2 py-3 font-medium text-gray-500 text-center w-8">
+                                                <div className="w-3 h-4 bg-red-500 mx-auto rounded-[1px] shadow-sm" title="Cartões Vermelhos"></div>
+                                            </th>
                                             <th className="px-3 py-3 font-medium text-gray-500 text-center w-12 hidden md:table-cell">%</th>
                                         </tr>
                                     </thead>
@@ -90,6 +96,8 @@ const GrupsPage = () => {
                                                 <td className={`px-3 py-3 text-center font-bold hidden sm:table-cell ${team.goalDifference > 0 ? 'text-green-600' : team.goalDifference < 0 ? 'text-red-500' : 'text-gray-400'}`}>
                                                     {team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}
                                                 </td>
+                                                <td className="px-2 py-3 text-center text-gray-500 font-bold">{team.yellowCards || 0}</td>
+                                                <td className="px-2 py-3 text-center text-red-600 font-bold">{team.redCards || 0}</td>
                                                 <td className="px-3 py-3 text-center text-gray-400 text-[11px] hidden md:table-cell font-medium tracking-tighter">
                                                     {calculateEfficiency(team.points, team.gamesPlayed)}%
                                                 </td>
@@ -101,10 +109,20 @@ const GrupsPage = () => {
 
                             {/* Legend - Only after the first group or at bottom if needed */}
                             {index === 0 && (
-                                <div className="mt-3 flex items-center gap-4 px-1">
+                                <div className="mt-3 flex flex-wrap items-center gap-6 px-1">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Fase de Mata-Mata</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-3 bg-yellow-400 rounded-[1px]"></div>
+                                            <span className="text-[10px] text-gray-400 font-medium">Amarelos</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-3 bg-red-500 rounded-[1px]"></div>
+                                            <span className="text-[10px] text-gray-400 font-medium">Vermelhos</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}

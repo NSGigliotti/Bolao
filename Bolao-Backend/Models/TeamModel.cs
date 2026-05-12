@@ -20,6 +20,9 @@ public class TeamModel
 
     public int GoalDifference => GoalsFor - GoalsAgainst;
 
+    public int YellowCards { get; set; }
+    public int RedCards { get; set; }
+
     public TeamModel() { }
 
     public TeamModel(string name, string abbreviation, char group, string? flagUrl = null)
@@ -36,5 +39,7 @@ public class TeamModel
         Losses = 0;
         GoalsFor = 0;
         GoalsAgainst = 0;
+        YellowCards = 0;
+        RedCards = 0;
     }
 }
