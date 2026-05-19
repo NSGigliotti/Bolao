@@ -37,9 +37,9 @@ namespace Bolao.Data ;
             
             // Substituir placeholders pelas variáveis de ambiente
             connectionString = connectionString
-                .Replace("${MYSQL_DATABASE}", Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao_db")
-                .Replace("${MYSQL_USER}", Environment.GetEnvironmentVariable("MYSQL_USER") ?? "bolao_user")
-                .Replace("${MYSQL_PASSWORD}", Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "");
+                .Replace("${MYSQL_DATABASE}", Environment.GetEnvironmentVariable("MYSQL_DATABASE"))
+                .Replace("${MYSQL_USER}", Environment.GetEnvironmentVariable("MYSQL_USER"))
+                .Replace("${MYSQL_PASSWORD}", Environment.GetEnvironmentVariable("MYSQL_PASSWORD"));
 
             var optionsBuilder = new DbContextOptionsBuilder<BolaoDbContext>();
             

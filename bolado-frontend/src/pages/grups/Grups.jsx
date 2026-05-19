@@ -1,10 +1,13 @@
 import React from 'react';
 import Navbar from '../../components/common/Navibar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, Minus } from 'lucide-react';
 import { useGrups } from '../../hooks/useGrups';
+import { API_ENDPOINTS } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const GrupsPage = () => {
-    const { groups, loading } = useGrups();
+    const { groups, loading, refresh } = useGrups();
+
 
     if (loading) {
         return (
@@ -18,6 +21,36 @@ const GrupsPage = () => {
         if (!gamesPlayed) return '0';
         return ((points / (gamesPlayed * 3)) * 100).toFixed(0);
     };
+
+    const handleUpdateCards = async (teamId, typeCard, quantity) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(API_ENDPOINTS.ADD_CARDS, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({
+                    idTeam: teamId,
+                    typeCard: typeCard,
+                    Quantity: quantity
+                })
+            });
+            if (!response.ok) throw new Error('Falha ao atualizar cartões');
+            toast.success('Cartões atualizados com sucesso');
+            refresh();
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro ao atualizar cartões');
+        }
+    };
+
+    // =========================================================================
+    // The backend SortByFifaCriteria already returns teams in the correct
+    // FIFA tiebreaker order (host-nation priority, H2H, GD, GF, fair play,
+    // FIFA ranking). We trust that order and do NOT re-sort on the frontend.
+    // =========================================================================
 
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
@@ -63,15 +96,15 @@ const GrupsPage = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {group.teams.map((team, index) => (
+                                        {group.teams.map((team, teamIndex) => (
                                             <tr key={team.id} className="hover:bg-blue-50/30 transition-colors group">
                                                 <td className="relative px-4 py-3 text-center">
                                                     {/* Qualification Indicator */}
-                                                    {index < 2 && (
+                                                    {teamIndex < 2 && (
                                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 h-full"></div>
                                                     )}
-                                                    <span className={`font-black text-sm ${index < 2 ? 'text-gray-900' : 'text-gray-400'}`}>
-                                                        {index + 1}
+                                                    <span className={`font-black text-sm ${teamIndex < 2 ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                        {teamIndex + 1}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -96,8 +129,42 @@ const GrupsPage = () => {
                                                 <td className={`px-3 py-3 text-center font-bold hidden sm:table-cell ${team.goalDifference > 0 ? 'text-green-600' : team.goalDifference < 0 ? 'text-red-500' : 'text-gray-400'}`}>
                                                     {team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}
                                                 </td>
-                                                <td className="px-2 py-3 text-center text-gray-500 font-bold">{team.yellowCards || 0}</td>
-                                                <td className="px-2 py-3 text-center text-red-600 font-bold">{team.redCards || 0}</td>
+                                                {/* Yellow Cards */}
+                                                <td className="px-2 py-3 text-center">
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        <button 
+                                                            onClick={() => handleUpdateCards(team.id, 1, -1)} 
+                                                            className="w-5 h-5 flex items-center justify-center rounded bg-gray-200 hover:bg-red-400 hover:text-white text-gray-600 transition-colors"
+                                                        >
+                                                            <Minus size={14} />
+                                                        </button>
+                                                        <span className="text-gray-500 font-bold min-w-[16px] text-center">{team.yellowCards || 0}</span>
+                                                        <button 
+                                                            onClick={() => handleUpdateCards(team.id, 1, 1)} 
+                                                            className="w-5 h-5 flex items-center justify-center rounded bg-gray-200 hover:bg-green-500 hover:text-white text-gray-600 transition-colors"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                {/* Red Cards */}
+                                                <td className="px-2 py-3 text-center">
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        <button 
+                                                            onClick={() => handleUpdateCards(team.id, 2, -1)} 
+                                                            className="w-5 h-5 flex items-center justify-center rounded bg-gray-200 hover:bg-red-400 hover:text-white text-gray-600 transition-colors"
+                                                        >
+                                                            <Minus size={14} />
+                                                        </button>
+                                                        <span className="text-red-600 font-bold min-w-[16px] text-center">{team.redCards || 0}</span>
+                                                        <button 
+                                                            onClick={() => handleUpdateCards(team.id, 2, 1)} 
+                                                            className="w-5 h-5 flex items-center justify-center rounded bg-gray-200 hover:bg-green-500 hover:text-white text-gray-600 transition-colors"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
+                                                    </div>
+                                                </td>
                                                 <td className="px-3 py-3 text-center text-gray-400 text-[11px] hidden md:table-cell font-medium tracking-tighter">
                                                     {calculateEfficiency(team.points, team.gamesPlayed)}%
                                                 </td>

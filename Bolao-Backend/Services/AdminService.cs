@@ -295,4 +295,26 @@ public class AdminService : IAdminService
         return "Jogo adicionado com sucesso";
 
     }
+
+    public async Task<string> AddCardTeam(CardTeamUpdateDTOS cardTeamUpdateDTOS)
+    {
+        if(cardTeamUpdateDTOS == null) throw new Exception ("Parametros invalidos");
+
+        TeamModel team = await _iMatchRepository.GetTeamById(cardTeamUpdateDTOS.idTeam);
+
+        if(cardTeamUpdateDTOS.typeCard == TypeCard.yellow)
+        {
+            team.YellowCards += cardTeamUpdateDTOS.Quantity;
+            if (team.YellowCards < 0) team.YellowCards = 0;
+        } else
+        {
+            team.RedCards += cardTeamUpdateDTOS.Quantity;
+            if (team.RedCards < 0) team.RedCards = 0;
+        }
+
+        await _iMatchRepository.UpdateTeam(team);
+        await _machesValidate.UpdateKnockoutBracket(_iMatchRepository);
+
+        return "Cartoes adicionados";
+    }
 }

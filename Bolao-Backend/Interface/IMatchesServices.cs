@@ -13,4 +13,6 @@ public interface IMachesService
     Task<Guid> CreateAPrediction(MakePredictionDTOs createAPrediction, Guid id);
     Task UpdatePrediction(UpdatePredicitionDTOS updatePredicition,Guid id);
     Task<LoginPayloadDTOs> FinishPrediction(Guid id);
+
+    
 }

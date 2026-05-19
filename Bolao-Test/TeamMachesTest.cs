@@ -26,9 +26,9 @@ public class TeamMachesTest
         if (string.IsNullOrEmpty(envPath)) throw new FileNotFoundException("Could not find .env file.");
         Env.Load(envPath);
 
-        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "Bolao!Password@2026";
-        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "bolao_user";
-        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao_db";
+        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER");
+        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
         string dbPort = "3307"; 
 
         var connectionString = $"Server=localhost;Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};GuidFormat=Char36;";

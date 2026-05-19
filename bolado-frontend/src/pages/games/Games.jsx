@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import Navbar from '../../components/common/Navibar';
-import { Loader2, Calendar, AlertCircle, Scale } from 'lucide-react';
+import { Loader2, Calendar, AlertCircle, Scale, Trophy, Hash } from 'lucide-react';
 import { API_ENDPOINTS } from '../../services/api';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { getMatchLabel as getKnockoutLabel, getTeamDescription } from '../../utils/matchLabels';
 
 const GamesPage = () => {
     const { userId } = useParams();
@@ -181,111 +182,131 @@ const GamesPage = () => {
                                         if (!match) return null;
                                         
                                         const myPred = myPredictions[match.id];
+                                        const isKnockout = match.stage >= 3;
+                                        const displayLabel = isKnockout ? getKnockoutLabel(match.id) : null;
 
                                         return (
-                                            <div key={pred.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:border-indigo-200 transition-colors">
-                                                <div className="text-xs text-gray-400 font-medium mb-3 flex items-center gap-1">
-                                                    <Calendar size={12} />
-                                                    {new Date(match.matchDate).toLocaleDateString()}
-                                                    <span className="mx-1">•</span>
-                                                    {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            <div key={pred.id} className={`p-4 rounded-xl border transition-all shadow-sm hover:shadow-md ${
+                                                isKnockout 
+                                                ? 'bg-gradient-to-br from-white to-indigo-50 border-indigo-100 hover:border-indigo-300' 
+                                                : 'bg-white border-gray-200 hover:border-indigo-200'
+                                            }`}>
+                                                <div className="text-xs text-gray-400 font-medium mb-3 flex items-center gap-2">
+                                                    <Calendar size={12} className={isKnockout ? 'text-indigo-400' : ''} />
+                                                    <span className={isKnockout ? 'text-indigo-900 font-bold' : ''}>
+                                                        {new Date(match.matchDate).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="mx-1 opacity-30">•</span>
+                                                    <span className={isKnockout ? 'text-indigo-900 font-bold' : ''}>
+                                                        {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+
+                                                    {isKnockout && (
+                                                        <span className="ml-2 px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded uppercase tracking-wider flex items-center gap-0.5">
+                                                            <Hash size={8} /> {displayLabel}
+                                                        </span>
+                                                    )}
+
                                                     {pred.pointsGained > 0 && (
-                                                        <span className="ml-auto bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold" title={`Pontos de ${userName}`}>
+                                                        <span className="ml-auto bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm" title={`Pontos de ${userName}`}>
                                                             +{pred.pointsGained} pts
                                                         </span>
                                                     )}
                                                 </div>
 
-                                                <div className="flex flex-col gap-3">
-                                                    {/* User's Prediction */}
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <div className="flex-1 flex items-center justify-end gap-2 text-right">
-                                                            <span className="font-bold text-gray-800 text-sm leading-tight">
-                                                                {match.homeTeam ? match.homeTeam.name : (pred.homeTeam ? pred.homeTeam.name : 'TBD')}
-                                                            </span>
-                                                            {(match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl) ? (
-                                                                <img src={match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                                            ) : (
-                                                                <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                                            )}
-                                                        </div>
-
-                                                        <div className="flex flex-col items-center">
-                                                            {isComparing && <span className="text-[10px] text-gray-400 font-medium mb-1 uppercase tracking-wider">{userName.split(' ')[0]}</span>}
-                                                            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                                                                <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.homeTeamScore}</span>
-                                                                <span className="text-gray-400 text-xs">x</span>
-                                                                <span className="font-bold text-lg text-gray-900 w-6 text-center">{pred.awayTeamScore}</span>
+                                                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                                                    {/* User's Team Left */}
+                                                    <div className="flex flex-col items-center gap-1.5 min-w-0">
+                                                        {(match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl) ? (
+                                                            <img src={match.homeTeam?.flagUrl || pred.homeTeam?.flagUrl} alt="" className="w-10 h-7 object-cover rounded shadow-sm border border-gray-100" />
+                                                        ) : isKnockout ? (
+                                                            <div className="w-10 h-7 bg-indigo-50 border border-indigo-100 rounded flex items-center justify-center">
+                                                                <Trophy size={14} className="text-indigo-200" />
                                                             </div>
-                                                        </div>
+                                                        ) : (
+                                                            <div className="w-10 h-7 bg-gray-50 rounded"></div>
+                                                        )}
+                                                        <span className={`text-[10px] md:text-xs font-black text-center leading-tight truncate w-full ${!match.homeTeam && !pred.homeTeam && isKnockout ? 'text-indigo-400 italic' : 'text-gray-700'}`}>
+                                                            {match.homeTeam ? match.homeTeam.name : (pred.homeTeam ? pred.homeTeam.name : (isKnockout ? getTeamDescription(match.id, 'home') : 'TBD'))}
+                                                        </span>
+                                                    </div>
 
-                                                        <div className="flex-1 flex items-center justify-start gap-2 text-left">
-                                                            {(match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl) ? (
-                                                                <img src={match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                                            ) : (
-                                                                <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                                            )}
-                                                            <span className="font-bold text-gray-800 text-sm leading-tight">
-                                                                {match.awayTeam ? match.awayTeam.name : (pred.awayTeam ? pred.awayTeam.name : 'TBD')}
-                                                            </span>
+                                                    {/* User's Score Center */}
+                                                    <div className="flex flex-col items-center">
+                                                        {isComparing && <span className="text-[9px] text-gray-400 font-black mb-1 uppercase tracking-widest">{userName.split(' ')[0]}</span>}
+                                                        <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
+                                                            <span className="font-black text-xl text-gray-900 w-6 text-center">{pred.homeTeamScore}</span>
+                                                            <span className="text-gray-300 font-black text-xs">×</span>
+                                                            <span className="font-black text-xl text-gray-900 w-6 text-center">{pred.awayTeamScore}</span>
                                                         </div>
                                                     </div>
 
-                                                    {/* My Prediction (Comparison) */}
-                                                    {isComparing && (
-                                                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-dashed border-gray-100 mt-1">
-                                                            <div className="flex-1 flex items-center justify-end gap-2 text-right opacity-80">
-                                                                {myPred && (
-                                                                    <>
-                                                                        <span className="font-bold text-indigo-800 text-sm leading-tight">
-                                                                            {myPred.homeTeam ? myPred.homeTeam.name : (match.homeTeam ? match.homeTeam.name : 'TBD')}
-                                                                        </span>
-                                                                        {(myPred.homeTeam?.flagUrl || match.homeTeam?.flagUrl) ? (
-                                                                            <img src={myPred.homeTeam?.flagUrl || match.homeTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                                                        ) : (
-                                                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                                                        )}
-                                                                    </>
-                                                                )}
+                                                    {/* User's Team Right */}
+                                                    <div className="flex flex-col items-center gap-1.5 min-w-0">
+                                                        {(match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl) ? (
+                                                            <img src={match.awayTeam?.flagUrl || pred.awayTeam?.flagUrl} alt="" className="w-10 h-7 object-cover rounded shadow-sm border border-gray-100" />
+                                                        ) : isKnockout ? (
+                                                            <div className="w-10 h-7 bg-indigo-50 border border-indigo-100 rounded flex items-center justify-center">
+                                                                <Trophy size={14} className="text-indigo-200" />
                                                             </div>
-                                                            
+                                                        ) : (
+                                                            <div className="w-10 h-7 bg-gray-50 rounded"></div>
+                                                        )}
+                                                        <span className={`text-[10px] md:text-xs font-black text-center leading-tight truncate w-full ${!match.awayTeam && !pred.awayTeam && isKnockout ? 'text-indigo-400 italic' : 'text-gray-700'}`}>
+                                                            {match.awayTeam ? match.awayTeam.name : (pred.awayTeam ? pred.awayTeam.name : (isKnockout ? getTeamDescription(match.id, 'away') : 'TBD'))}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* My Prediction (Comparison) */}
+                                                {isComparing && (
+                                                    <div className="mt-4 pt-4 border-t border-dashed border-gray-100">
+                                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 opacity-80">
+                                                            {/* My Team Left */}
+                                                            <div className="flex flex-col items-center gap-1 min-w-0">
+                                                                {(myPred?.homeTeam?.flagUrl || match.homeTeam?.flagUrl) ? (
+                                                                    <img src={myPred?.homeTeam?.flagUrl || match.homeTeam?.flagUrl} alt="" className="w-8 h-6 object-cover rounded-sm shadow-sm border border-indigo-50" />
+                                                                ) : (
+                                                                    <div className="w-8 h-6 bg-gray-50 rounded-sm"></div>
+                                                                )}
+                                                                <span className="text-[9px] font-bold text-indigo-900 text-center truncate w-full">
+                                                                    {myPred?.homeTeam ? myPred.homeTeam.name : (match.homeTeam ? match.homeTeam.name : 'TBD')}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* My Score Center */}
                                                             <div className="flex flex-col items-center">
-                                                                <span className="text-[10px] text-indigo-500 font-bold mb-1 uppercase tracking-wider">Você</span>
+                                                                <span className="text-[9px] text-indigo-500 font-black mb-1 uppercase tracking-widest">Você</span>
                                                                 {myPred ? (
-                                                                    <div className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 rounded-lg border border-indigo-100">
-                                                                        <span className="font-bold text-lg text-indigo-900 w-6 text-center">{myPred.homeTeamScore}</span>
-                                                                        <span className="text-indigo-400 text-xs">x</span>
-                                                                        <span className="font-bold text-lg text-indigo-900 w-6 text-center">{myPred.awayTeamScore}</span>
+                                                                    <div className="flex items-center gap-1.5 px-2 py-1 bg-indigo-600 text-white rounded-lg shadow-md">
+                                                                        <span className="font-black text-sm w-4 text-center">{myPred.homeTeamScore}</span>
+                                                                        <span className="text-indigo-300 font-black text-[10px]">×</span>
+                                                                        <span className="font-black text-sm w-4 text-center">{myPred.awayTeamScore}</span>
                                                                     </div>
                                                                 ) : (
-                                                                    <div className="px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 text-xs text-gray-400">
-                                                                        Sem palpite
-                                                                    </div>
+                                                                    <div className="px-2 py-1 bg-gray-50 rounded text-[9px] text-gray-400 font-bold border border-gray-100 uppercase">Sem palpite</div>
                                                                 )}
                                                             </div>
-                                                            
-                                                            <div className="flex-1 flex items-center justify-start gap-2 text-left opacity-80">
-                                                                {myPred && (
-                                                                    <>
-                                                                        {(myPred.awayTeam?.flagUrl || match.awayTeam?.flagUrl) ? (
-                                                                            <img src={myPred.awayTeam?.flagUrl || match.awayTeam?.flagUrl} alt="" className="w-6 h-4 object-cover rounded shadow-sm" />
-                                                                        ) : (
-                                                                            <div className="w-6 h-4 bg-gray-100 rounded"></div>
-                                                                        )}
-                                                                        <span className="font-bold text-indigo-800 text-sm leading-tight">
-                                                                            {myPred.awayTeam ? myPred.awayTeam.name : (match.awayTeam ? match.awayTeam.name : 'TBD')}
-                                                                        </span>
-                                                                        {myPred.pointsGained > 0 && (
-                                                                            <span className="ml-auto bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold" title="Seus pontos">
-                                                                                +{myPred.pointsGained} pts
-                                                                            </span>
-                                                                        )}
-                                                                    </>
+
+                                                            {/* My Team Right */}
+                                                            <div className="flex flex-col items-center gap-1 min-w-0 relative">
+                                                                {(myPred?.awayTeam?.flagUrl || match.awayTeam?.flagUrl) ? (
+                                                                    <img src={myPred?.awayTeam?.flagUrl || match.awayTeam?.flagUrl} alt="" className="w-8 h-6 object-cover rounded-sm shadow-sm border border-indigo-50" />
+                                                                ) : (
+                                                                    <div className="w-8 h-6 bg-gray-50 rounded-sm"></div>
+                                                                )}
+                                                                <span className="text-[9px] font-bold text-indigo-900 text-center truncate w-full">
+                                                                    {myPred?.awayTeam ? myPred.awayTeam.name : (match.awayTeam ? match.awayTeam.name : 'TBD')}
+                                                                </span>
+                                                                {myPred?.pointsGained > 0 && (
+                                                                    <span className="absolute -top-6 -right-2 bg-indigo-600 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black shadow-sm">
+                                                                        +{myPred.pointsGained}
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
 
                                                 {/* Real Score Badge (if match finished) */}
                                                 {match.status === 2 && (

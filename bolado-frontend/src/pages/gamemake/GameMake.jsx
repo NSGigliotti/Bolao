@@ -2,6 +2,7 @@ import React from 'react';
 import { Trophy, Save, Loader2, Calendar, AlertCircle, ChevronRight, Check } from 'lucide-react';
 import Navbar from '../../components/common/Navibar';
 import { useGameMake } from '../../hooks/useGameMake';
+import { getMatchLabel, getTeamDescription } from '../../utils/matchLabels';
 
 const GameMake = () => {
     const {
@@ -35,98 +36,123 @@ const GameMake = () => {
             else if (match.stage === 7 || match.id === 103) headerLabel = "Disputa de 3º Lugar";
         }
 
+        const isKnockout = match.stage >= 3;
+        const matchLabel = isKnockout ? getMatchLabel(match.id, activeTab) : null;
+
         return (
-            <div key={match.id} className={`bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all relative ${headerLabel ? 'border-t-4 border-t-yellow-400' : ''}`}>
-                {/* Save status indicator */}
-                {savingMatches[match.id] && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1 text-blue-500">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-xs font-medium">Salvando...</span>
+            <div key={match.id} className={`p-5 rounded-2xl border transition-all relative group shadow-sm hover:shadow-md flex flex-col gap-4 bg-white ${headerLabel ? 'border-t-4 border-t-yellow-400' : 'border-gray-100'}`}>
+                
+                {/* Status Indicator */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    {savingMatches[match.id] && (
+                        <div className="flex items-center gap-1 text-blue-500 animate-pulse">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span className="text-[10px] font-bold uppercase">Salvando</span>
+                        </div>
+                    )}
+                    {!savingMatches[match.id] && savedMatches[match.id] && (
+                        <div className="flex items-center gap-1 text-green-500">
+                            <Check className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase">Salvo</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Header: Label and Date */}
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                        {headerLabel && (
+                            <span className="px-3 py-1 bg-yellow-400 text-yellow-900 text-[9px] font-black rounded-full uppercase tracking-widest self-start">
+                                {headerLabel}
+                            </span>
+                        )}
+                        {isKnockout && !headerLabel && (
+                            <span className="px-2.5 py-1 bg-indigo-600 text-white text-[9px] font-black rounded-lg uppercase tracking-wider self-start flex items-center gap-1 shadow-sm">
+                                <Hash size={8} /> {matchLabel}
+                            </span>
+                        )}
                     </div>
-                )}
-                {!savingMatches[match.id] && savedMatches[match.id] && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1 text-green-500">
-                        <Check className="w-4 h-4" />
-                        <span className="text-xs font-medium">Salvo</span>
-                    </div>
-                )}
-                {headerLabel && (
-                    <div className="mb-4 text-center">
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full uppercase tracking-wider">
-                            {headerLabel}
+                    
+                    <div className="flex items-center gap-1.5 text-gray-400">
+                        <Calendar size={12} className={isKnockout ? 'text-indigo-400' : ''} />
+                        <span className="text-[10px] font-bold">
+                            {new Date(match.matchDate).toLocaleDateString().slice(0, 5)} {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
-                )}
-                <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
-                    <div className="text-xs text-gray-400 font-medium md:flex-col text-center md:text-left md:w-20">
-                        {new Date(match.matchDate).toLocaleDateString().slice(0, 5)}
-                        <span className="hidden md:block">{new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+
+                {/* Teams and Score Grid */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                    {/* Home Team */}
+                    <div className="flex flex-col items-center gap-2 min-w-0">
+                        <div className="relative">
+                            {homeTeam && homeTeam.flagUrl ? (
+                                <img src={homeTeam.flagUrl} alt={homeTeam.name} className="w-14 h-10 object-cover rounded-md shadow-sm border border-gray-100" />
+                            ) : (
+                                <div className="w-14 h-10 bg-indigo-50 border border-indigo-100 rounded-md flex items-center justify-center">
+                                    <Trophy size={18} className="text-indigo-200" />
+                                </div>
+                            )}
+                        </div>
+                        <span className={`text-xs font-black text-center leading-tight truncate w-full ${!homeTeam ? 'text-indigo-400 italic text-[10px]' : 'text-gray-800'}`}>
+                            {homeTeam ? homeTeam.name : getTeamDescription(match.id, 'home')}
+                        </span>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center gap-4 w-full">
-                        {/* Home */}
-                        <div className="flex-1 flex items-center justify-end gap-3 text-right">
-                            <span className="font-bold text-gray-800 text-sm md:text-base leading-tight">
-                                {homeTeam ? homeTeam.name : 'A Definir'}
+                    {/* Score / Inputs */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="number"
+                                min="0"
+                                className={`w-12 h-12 text-center font-black text-xl border-2 rounded-xl outline-none transition-all shadow-sm ${!homeTeam || !awayTeam
+                                    ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed shadow-none'
+                                    : (isKnockout && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
+                                        ? 'border-red-400 bg-red-50 text-red-600 focus:ring-red-100'
+                                        : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                                    }`}
+                                value={predictions[match.id]?.home ?? ''}
+                                onChange={(e) => handleScoreChange(match.id, 'home', e.target.value)}
+                                onBlur={(e) => handleBlur(match.id, 'home', e.target.value)}
+                                disabled={!homeTeam || !awayTeam}
+                            />
+                            <span className="text-gray-200 font-black text-xl">×</span>
+                            <input
+                                type="number"
+                                min="0"
+                                className={`w-12 h-12 text-center font-black text-xl border-2 rounded-xl outline-none transition-all shadow-sm ${!homeTeam || !awayTeam
+                                    ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed shadow-none'
+                                    : (isKnockout && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
+                                        ? 'border-red-400 bg-red-50 text-red-600 focus:ring-red-100'
+                                        : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                                    }`}
+                                value={predictions[match.id]?.away ?? ''}
+                                onChange={(e) => handleScoreChange(match.id, 'away', e.target.value)}
+                                onBlur={(e) => handleBlur(match.id, 'away', e.target.value)}
+                                disabled={!homeTeam || !awayTeam}
+                            />
+                        </div>
+                        {isKnockout && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined && (
+                            <span className="text-[9px] text-red-500 font-black uppercase tracking-widest flex items-center gap-1 animate-bounce">
+                                <AlertCircle size={10} /> Empate não permitido
                             </span>
-                            {homeTeam && homeTeam.flagUrl ? (
-                                <img src={homeTeam.flagUrl} alt={homeTeam.name} className="w-8 h-6 object-cover rounded shadow-sm" />
-                            ) : (
-                                <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-300">?</div>
-                            )}
-                        </div>
+                        )}
+                    </div>
 
-                        {/* Score */}
-                        <div className="flex flex-col items-center gap-2">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
-                                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                                        : (match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
-                                            ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
-                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                                        }`}
-                                    value={predictions[match.id]?.home ?? ''}
-                                    onChange={(e) => handleScoreChange(match.id, 'home', e.target.value)}
-                                    onBlur={(e) => handleBlur(match.id, 'home', e.target.value)}
-                                    disabled={!homeTeam || !awayTeam}
-                                />
-                                <span className="text-gray-300 font-bold">×</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className={`w-10 h-10 md:w-12 md:h-12 text-center font-bold text-lg border-2 rounded-lg outline-none transition-all ${!homeTeam || !awayTeam
-                                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                                        : (match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined)
-                                            ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
-                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                                        }`}
-                                    value={predictions[match.id]?.away ?? ''}
-                                    onChange={(e) => handleScoreChange(match.id, 'away', e.target.value)}
-                                    onBlur={(e) => handleBlur(match.id, 'away', e.target.value)}
-                                    disabled={!homeTeam || !awayTeam}
-                                />
-                            </div>
-                            {match.stage >= 3 && predictions[match.id]?.home === predictions[match.id]?.away && predictions[match.id]?.home !== '' && predictions[match.id]?.home !== undefined && (
-                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight flex items-center gap-1">
-                                    <AlertCircle size={10} /> Empate não permitido
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Away */}
-                        <div className="flex-1 flex items-center justify-start gap-3 text-left">
+                    {/* Away Team */}
+                    <div className="flex flex-col items-center gap-2 min-w-0">
+                        <div className="relative">
                             {awayTeam && awayTeam.flagUrl ? (
-                                <img src={awayTeam.flagUrl} alt={awayTeam.name} className="w-8 h-6 object-cover rounded shadow-sm" />
+                                <img src={awayTeam.flagUrl} alt={awayTeam.name} className="w-14 h-10 object-cover rounded-md shadow-sm border border-gray-100" />
                             ) : (
-                                <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-300">?</div>
+                                <div className="w-14 h-10 bg-indigo-50 border border-indigo-100 rounded-md flex items-center justify-center">
+                                    <Trophy size={18} className="text-indigo-200" />
+                                </div>
                             )}
-                            <span className="font-bold text-gray-800 text-sm md:text-base leading-tight">
-                                {awayTeam ? awayTeam.name : 'A Definir'}
-                            </span>
                         </div>
+                        <span className={`text-xs font-black text-center leading-tight truncate w-full ${!awayTeam ? 'text-indigo-400 italic text-[10px]' : 'text-gray-800'}`}>
+                            {awayTeam ? awayTeam.name : getTeamDescription(match.id, 'away')}
+                        </span>
                     </div>
                 </div>
             </div>

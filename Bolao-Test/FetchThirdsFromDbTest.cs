@@ -2,210 +2,119 @@ using Xunit;
 using Xunit.Abstractions;
 using Bolao.Models;
 using Bolao.Data;
-using Bolao.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Bolao.Services;
+using System.IO;
 using DotNetEnv;
 using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Bolao_Test;
 
 public class FetchThirdsFromDbTest
 {
     private readonly ITestOutputHelper _output;
+    private readonly BolaoDbContext _context;
+    private readonly MachesRepository _repository;
+    private readonly MachesValidate _machesValidate;
 
     public FetchThirdsFromDbTest(ITestOutputHelper output)
     {
         _output = output;
-    }
-
-    [Fact]
-    public async Task Fetch_Thirds_Directly_From_All_Possible_Ports()
-    {
-        int[] ports = { 3306, 3307 };
-        foreach (var port in ports) {
-            _output.WriteLine($"\n--- TRYING PORT {port} ---");
-            try {
-                await TryFetch(port);
-            } catch (Exception ex) {
-                _output.WriteLine($"Error on port {port}: {ex.Message}");
-            }
-        }
-    }
-
-    private async Task TryFetch(int port)
-    {
         string currentDir = Directory.GetCurrentDirectory();
-        string envPath = Path.Combine(currentDir, "..", "..", "..", ".env"); // Tenta subir mais níveis se necessário
-        if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, "..", ".env");
+        string envPath = Path.Combine(currentDir, "..", ".env"); 
         if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, ".env");
-        
         if (File.Exists(envPath)) Env.Load(envPath);
 
-        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "bolao_password";
-        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "bolao_user";
-        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao_db"; 
+        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "root";
+        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
+        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao"; 
+        string dbPort = "3307"; 
 
-        var connectionString = $"Server=localhost;Port={port};Database={dbName};User={dbUser};Password={dbPassword};GuidFormat=Char36;AllowPublicKeyRetrieval=True;SslMode=None";
+        var connectionString = $"Server=localhost;Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};GuidFormat=Char36;AllowPublicKeyRetrieval=True;SslMode=None";
         
         var options = new DbContextOptionsBuilder<BolaoDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             .Options;
             
-        using var context = new BolaoDbContext(options);
-        
-        var allTeams = await context.Teams.ToListAsync();
-        var allMatches = await context.Matches.ToListAsync();
+        _context = new BolaoDbContext(options);
+        _repository = new MachesRepository(_context);
+        _machesValidate = new MachesValidate();
+    }
 
-        _output.WriteLine($"Total Teams Found: {allTeams.Count}");
-        _output.WriteLine($"Total Matches Found: {allMatches.Count}");
-        
-        var finishedMatches = allMatches.Where(m => m.Status == Bolao.Enum.MatchStatus.Finished || m.HomeTeamScore.HasValue).ToList();
-        _output.WriteLine($"Total Matches with Results: {finishedMatches.Count}");
-        
-        var grouped = allMatches.GroupBy(m => m.Stage);
-        foreach (var g in grouped) {
-            string stageName = g.Key switch
-            {
-                Bolao.Enum.MatchStage.GroupStageRound1 => "1ª Rodada (Fase de Grupos)",
-                Bolao.Enum.MatchStage.GroupStageRound2 => "2ª Rodada (Fase de Grupos)",
-                Bolao.Enum.MatchStage.GroupStageRound3 => "3ª Rodada (Fase de Grupos)",
-                _ => "Other"
-            };
-            _output.WriteLine($"Stage {g.Key}: {g.Count()} matches, Name: {stageName}");
-        }
+    [Fact]
+    public async Task Show_Ranked_Thirds_A_B_C_D_F()
+    {
+        var allTeams = await _context.Teams.ToListAsync();
+        var allMatches = await _context.Matches.Where(m => m.Status == Bolao.Enum.MatchStatus.Finished).ToListAsync();
 
-        if (finishedMatches.Count == 0) {
-             _output.WriteLine("Warning: No results found in database for this port.");
-             return;
-        }
-
-        // Limpar stats para recalculate fielmente do banco
+        // Reset stats to ensure fresh calculation
         foreach (var t in allTeams) {
-            t.Points = 0; t.GamesPlayed = 0; t.Wins = 0; t.GoalsFor = 0; t.GoalsAgainst = 0;
+            t.Points = 0; t.GoalsFor = 0; t.GoalsAgainst = 0; t.YellowCards = 0; t.RedCards = 0;
         }
 
-        // Recalcular stats baseada nos jogos com resultado
-        foreach (var m in finishedMatches.Where(m => m.IsGroupStage)) {
-             var home = allTeams.FirstOrDefault(t => t.Id == m.HomeTeamId);
-             var away = allTeams.FirstOrDefault(t => t.Id == m.AwayTeamId);
-             if (home == null || away == null || !m.HomeTeamScore.HasValue || !m.AwayTeamScore.HasValue) continue;
-             
-             home.GamesPlayed++; away.GamesPlayed++;
-             home.GoalsFor += m.HomeTeamScore.Value; home.GoalsAgainst += m.AwayTeamScore.Value;
-             away.GoalsFor += m.AwayTeamScore.Value; away.GoalsAgainst += m.HomeTeamScore.Value;
-             
-             if (m.HomeTeamScore > m.AwayTeamScore) { home.Points += 3; home.Wins++; }
-             else if (m.HomeTeamScore < m.AwayTeamScore) { away.Points += 3; away.Wins++; }
-             else { home.Points += 1; away.Points += 1; }
-        }
-
-        var groups = "ABCDFGHIKL".ToCharArray(); // Pega mais grupos para garantir
-        var results = new List<(TeamModel Team, double Rank)>();
-
-        _output.WriteLine("\n[STANDINGS FROM DB]");
-        foreach (var gChar in groups) {
-            var groupTeams = allTeams.Where(t => t.Group == gChar).ToList();
-            if (!groupTeams.Any()) continue;
-
-            var sorted = groupTeams.OrderByDescending(t => t.Points)
-                                   .ThenByDescending(t => t.GoalsFor - t.GoalsAgainst)
-                                   .ThenByDescending(t => t.Wins)
-                                   .ThenByDescending(t => t.GoalsFor)
-                                   .ToList();
-            
-            _output.WriteLine($"Group {gChar}:");
-            foreach(var t in sorted) {
-                _output.WriteLine($"  {t.Name}: {t.Points}pts, SG {t.GoalsFor - t.GoalsAgainst}");
-            }
-
-            var third = sorted.ElementAtOrDefault(2);
-            if (third != null && "ABCDF".Contains(gChar)) {
-                double rank = GetRankingRobust(third.Name);
-                results.Add((third, rank));
-            }
-        }
-
-        _output.WriteLine("\n[FINAL LIST OF THIRDS SORTED BY RANK]");
-        foreach (var res in results.OrderByDescending(r => r.Rank)) {
-            _output.WriteLine($"{res.Team.Group}|{res.Team.Name}|{res.Team.Points}|{res.Team.GoalDifference}|{res.Team.GoalsFor}|{res.Rank:F2}");
-        }
-    }
-
-    [Fact]
-    public async Task Seed_Database()
-    {
-        int port = 3307; // Use specific port for seeding
-        string currentDir = Directory.GetCurrentDirectory();
-        string envPath = Path.Combine(currentDir, "..", "..", "..", ".env");
-        if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, "..", ".env");
-        if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, ".env");
-        
-        if (File.Exists(envPath)) Env.Load(envPath);
-
-        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "bolao_password";
-        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "bolao_user";
-        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao_db"; 
-
-        var connectionString = $"Server=localhost;Port={port};Database={dbName};User={dbUser};Password={dbPassword};GuidFormat=Char36;AllowPublicKeyRetrieval=True;SslMode=None;AllowUserVariables=True";
-        
-        var options = new DbContextOptionsBuilder<BolaoDbContext>()
-            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-            .Options;
-            
-        using var context = new BolaoDbContext(options);
-
-        _output.WriteLine("Deleting existing data...");
-        await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0;");
-        await context.Database.ExecuteSqlRawAsync("DELETE FROM Prediction;");
-        await context.Database.ExecuteSqlRawAsync("DELETE FROM Matches;");
-        await context.Database.ExecuteSqlRawAsync("DELETE FROM Teams;");
-        await context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1;");
-
-        _output.WriteLine("Reading init-teams.sql...");
-        string sqlPath = "";
-        string tempPath = currentDir;
-        for (int i = 0; i < 6; i++)
+        // Simulate stats from matches (assuming matches are in DB)
+        foreach (var m in allMatches.Where(m => m.IsGroupStage))
         {
-            sqlPath = Path.Combine(tempPath, "Bolao-Backend", "Db", "scripts", "init-teams.sql");
-            if (File.Exists(sqlPath)) break;
-            tempPath = Path.Combine(tempPath, "..");
-        }
-        
-        if (!File.Exists(sqlPath)) throw new Exception($"Could not find init-teams.sql at {sqlPath}");
-        
-        string sql = await File.ReadAllTextAsync(sqlPath);
-        
-        _output.WriteLine("Executing seeding script...");
-        // Split by semicolon and filter out empty strings to avoid multi-statement issues if provider doesn't support them well
-        // However, for seeding, we need to be careful with the (SELECT Id...) subqueries.
-        // Actually, for MySQL, we can just run the whole thing if we use a raw command.
-        
-        var connection = context.Database.GetDbConnection();
-        await connection.OpenAsync();
-        using var command = connection.CreateCommand();
-        command.CommandText = sql;
-        await command.ExecuteNonQueryAsync();
-        
-        var teamCount = await context.Teams.CountAsync();
-        var matchCount = await context.Matches.CountAsync();
-        _output.WriteLine($"Seeding completed successfully! Teams: {teamCount}, Matches: {matchCount}");
-    }
+            var home = allTeams.FirstOrDefault(t => t.Id == m.HomeTeamId);
+            var away = allTeams.FirstOrDefault(t => t.Id == m.AwayTeamId);
+            if (home == null || away == null) continue;
 
-    private double GetRankingRobust(string name) {
-        if (string.IsNullOrWhiteSpace(name)) return 0;
-        var cleanName = name.Trim();
-        if (Bolao.Config.FifaRankingsConfig.Points.TryGetValue(cleanName, out var p)) return p;
-        
-        // Tenta sem acentos se falhar (ex: Republica Tcheca)
-        var fallbackName = cleanName.Replace("é", "e").Replace("ú", "u").Replace("á", "a").Replace("í", "i").Replace("ã", "a");
-        foreach(var kv in Bolao.Config.FifaRankingsConfig.Points) {
-            var keyClean = kv.Key.Replace("é", "e").Replace("ú", "u").Replace("á", "a").Replace("í", "i").Replace("ã", "a");
-            if (string.Equals(keyClean, fallbackName, StringComparison.OrdinalIgnoreCase)) return kv.Value;
+            home.GoalsFor += m.HomeTeamScore ?? 0;
+            home.GoalsAgainst += m.AwayTeamScore ?? 0;
+            away.GoalsFor += m.AwayTeamScore ?? 0;
+            away.GoalsAgainst += m.HomeTeamScore ?? 0;
+
+            if (m.HomeTeamScore > m.AwayTeamScore) home.Points += 3;
+            else if (m.AwayTeamScore > m.HomeTeamScore) away.Points += 3;
+            else { home.Points += 1; away.Points += 1; }
         }
-        return 0;
+
+        char[] targetGroups = { 'A', 'B', 'C', 'D', 'F' };
+        var thirds = new List<TeamModel>();
+
+        _output.WriteLine("=== STANDINGS DOS GRUPOS SELECIONADOS ===");
+        foreach (var g in targetGroups)
+        {
+            var groupTeams = allTeams.Where(t => t.Group == g).ToList();
+            // Using the SortByFifaCriteria which now uses the simplified 5 rules
+            var sorted = _machesValidate.InvokePrivateMethod<List<TeamModel>>("SortByFifaCriteria", groupTeams, allMatches);
+            
+            _output.WriteLine($"\nGrupo {g}:");
+            for(int i=0; i<sorted.Count; i++) {
+                var t = sorted[i];
+                _output.WriteLine($"{i+1}º: {t.Name} - Pts: {t.Points}, SG: {t.GoalDifference}, GP: {t.GoalsFor}");
+            }
+
+            if (sorted.Count >= 3) thirds.Add(sorted[2]);
+        }
+
+        var rankedThirds = thirds
+            .OrderByDescending(t => t.Points)
+            .ThenByDescending(t => t.GoalDifference)
+            .ThenByDescending(t => t.GoalsFor)
+            .ThenByDescending(t => (t.YellowCards * -1) + (t.RedCards * -3))
+            .ThenByDescending(t => _machesValidate.InvokePrivateMethod<double>("GetFifaRanking", t.Name))
+            .ToList();
+
+        _output.WriteLine("\n\n=== RANKING DOS TERCEIROS (A, B, C, D, F) ===");
+        _output.WriteLine("| Pos | Grupo | Seleção          | Pts | SG | GP | FP |");
+        for (int i = 0; i < rankedThirds.Count; i++)
+        {
+            var t = rankedThirds[i];
+            int fp = (t.YellowCards * -1) + (t.RedCards * -3);
+            _output.WriteLine($"| {i+1}º  |  {t.Group}    | {t.Name,-16} | {t.Points,3} | {t.GoalDifference,2} | {t.GoalsFor,2} | {fp,2} |");
+        }
+    }
+}
+
+public static class ReflectionExtensions
+{
+    public static T InvokePrivateMethod<T>(this object obj, string methodName, params object[] args)
+    {
+        var method = obj.GetType().GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        return (T)method.Invoke(obj, args);
     }
 }

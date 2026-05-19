@@ -33,9 +33,9 @@ public class MachesValidateTest : IAsyncLifetime
         
         if (File.Exists(envPath)) Env.Load(envPath);
 
-        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "bolao_password";
-        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "bolao_user";
-        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "bolao_db"; 
+        string dbPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+        string dbUser = Environment.GetEnvironmentVariable("MYSQL_USER");
+        string dbName = Environment.GetEnvironmentVariable("MYSQL_DATABASE"); 
         string dbPort = "3307"; 
 
         var connectionString = $"Server=localhost;Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};GuidFormat=Char36;AllowPublicKeyRetrieval=True;SslMode=None";

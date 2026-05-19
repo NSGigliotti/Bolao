@@ -5,11 +5,13 @@ using Bolao.Interfaces;
 using Bolao.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
+using Bolao.Services;
+
 public class MachesService : IMachesService
 {
     private readonly IMachesRepository _machesRepository;
     private readonly IUserRepository _userRepository;
-
+    private readonly MachesValidate _machesValidate;
 
     private string GetStageName(MatchStage stage) => stage switch
     {
@@ -25,10 +27,11 @@ public class MachesService : IMachesService
         _ => "Outros"
     };
 
-    public MachesService(IMachesRepository machesRepository, IUserRepository userRepository)
+    public MachesService(IMachesRepository machesRepository, IUserRepository userRepository, MachesValidate machesValidate)
     {
         _machesRepository = machesRepository;
         _userRepository = userRepository;
+        _machesValidate = machesValidate;
     }
 
 
@@ -50,13 +53,13 @@ public class MachesService : IMachesService
     public async Task<List<GroupDto>> GetGroupsAsync()
     {
         List<TeamModel> teams = await _machesRepository.GetGroupsAsync();
-
-        var hosts = new List<string> { "Mexico", "Canada", "Estados Unidos" };
+        var allMatch = await _machesRepository.GetAllMatch();
+        var groupMatches = allMatch.Where(m => m.IsGroupStage).ToList();
 
         var groupedTeams = teams.GroupBy(t => t.Group).OrderBy(g => g.Key).Select(g => new GroupDto
         {
             GroupName = g.Key,
-            Teams = g.OrderByDescending(t => t.Points).ThenByDescending(t => t.Points == 0 && hosts.Contains(t.Name)).ThenByDescending(t => t.GoalDifference).ThenByDescending(t => t.GoalsFor).ThenByDescending(t => t.Wins).ThenBy(t => t.Name).ToList()
+            Teams = _machesValidate.SortByFifaCriteria(g.ToList(), groupMatches)
         }).ToList();
 
         return groupedTeams;
@@ -253,4 +256,6 @@ public class MachesService : IMachesService
          return loginPayload;
 
     }
+
+    
 }

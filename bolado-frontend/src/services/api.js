@@ -14,4 +14,5 @@ export const API_ENDPOINTS = {
     GET_GROUPS: `${BASE_URL}/Maches/GetMachesGups`,
     GET_RANKING: `${BASE_URL}/Maches/GetAllRankUser`,
     UPDATE_PAYMENT: `${BASE_URL}/Admin/PaymentUpdate`,
+    ADD_CARDS: `${BASE_URL}/Admin/AddCards`,
 };

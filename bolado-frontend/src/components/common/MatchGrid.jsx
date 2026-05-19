@@ -10,7 +10,7 @@ const MatchGrid = ({ title, matches, onUpdate }) => {
                 <h2 className="text-xl font-bold text-gray-800">{title}</h2>
                 <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {matches.map((match, index) => (
                     <MatchCard 
                         key={match.id} 

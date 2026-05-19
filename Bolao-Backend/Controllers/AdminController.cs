@@ -66,4 +66,19 @@ public class AdminController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("AddCards")]
+    public async Task<IActionResult> AddCards([FromBody] CardTeamUpdateDTOS cardTeamUpdateDTOS)
+    {
+        try
+        {
+            string result = await _adminService.AddCardTeam(cardTeamUpdateDTOS);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
 }

@@ -15,9 +15,7 @@ public class TeamTrace
     public string QualificationType { get; set; } // Direct, BestThird
     public int? SourceMatchId { get; set; } // For knockout winners
 
-    public override string ToString() => SourceMatchId.HasValue
-            ? $"{TeamName} (Vindo do Jogo {SourceMatchId})"
-            : $"{TeamName} (Grupo {Group} - {Position}º colocado - {QualificationType})";
+    public override string ToString() => SourceMatchId.HasValue? $"{TeamName} (Vindo do Jogo {SourceMatchId})": $"{TeamName} (Grupo {Group} - {Position}º colocado - {QualificationType})";
 }
 
 public class MachesValidate
@@ -57,13 +55,13 @@ public class MachesValidate
     // Sequential bracket progression for R16, QF, SF, and Final
     private static readonly Dictionary<int, (string Home, string Away)> KnockoutFixedMapping = new()
     {
-        // Round of 16 (89-96) - Cruzamento Vertical (1 vs 3, 2 vs 4...)
-        { 89, ("W73", "W75") }, { 90, ("W74", "W76") }, { 91, ("W77", "W79") }, { 92, ("W78", "W80") },
-        { 93, ("W81", "W83") }, { 94, ("W82", "W84") }, { 95, ("W85", "W87") }, { 96, ("W86", "W88") },
+        // Round of 16 (89-96) - Cruzamento conforme calendário oficial FIFA 2026
+        { 89, ("W74", "W77") }, { 90, ("W73", "W75") }, { 91, ("W76", "W78") }, { 92, ("W79", "W80") },
+        { 93, ("W83", "W84") }, { 94, ("W81", "W82") }, { 95, ("W86", "W88") }, { 96, ("W85", "W87") },
         // Quarter-Finals (97-100)
-        { 97, ("W89", "W91") }, { 98, ("W90", "W92") }, { 99, ("W93", "W95") }, { 100, ("W94", "W96") },
+        { 97, ("W89", "W90") }, { 98, ("W93", "W94") }, { 99, ("W91", "W92") }, { 100, ("W95", "W96") },
         // Semi-Finals (101-102)
-        { 101, ("W97", "W99") }, { 102, ("W98", "W100") },
+        { 101, ("W97", "W98") }, { 102, ("W99", "W100") },
         // Third Place and Final
         { 103, ("L101", "L102") }, { 104, ("W101", "W102") }
     };
@@ -278,9 +276,7 @@ public class MachesValidate
 
         var groupStandings = CalculateGroupStandings(allTeams, groupMatchesFinished);
 
-        Console.WriteLine("\n[DEBUG] === RANKING DOS 12 TERCEIROS COLOCADOS (Para seleção dos 8 melhores) ===");
-        Console.WriteLine("| Grupo | Seleção              | Pts | SG  | GP  | Fair Play | Ranking FIFA |");
-        Console.WriteLine("|-------|-----------------------|-----|-----|-----|-----------|--------------|" );
+       
         var allThirdsDebug = groupStandings.Values
             .Select(g => g.ElementAtOrDefault(2))
             .Where(t => t != null)
@@ -296,8 +292,6 @@ public class MachesValidate
             var t = allThirdsDebug[i]!;
             var rank = GetFifaRanking(t.Name);
             var fairPlay = (t.YellowCards * -1) + (t.RedCards * -3);
-            var marker = i < 8 ? "✅" : "❌";
-            Console.WriteLine($"| {marker} {t.Group}  | {t.Name,-21} | {t.Points,3} | {t.GoalDifference,3} | {t.GoalsFor,3} | {fairPlay,9} | {rank,12:F2} |");
         }
 
         var bestThirds = GetBestThirds(groupStandings);
@@ -306,7 +300,6 @@ public class MachesValidate
         var assignedThirds = AssignThirdPlaceTeams(bestThirds);
 
         // === DEBUG: Mostrar atribuição dos terceiros aos jogos ===
-        Console.WriteLine("\n[DEBUG] === ATRIBUIÇÃO DOS TERCEIROS AOS JOGOS DO R32 ===");
         var slotsForDebug = new (int MatchId, string AllowedGroups)[]
         {
             (74, "ABCDF"), (77, "CDFGH"), (79, "CEFHI"), (80, "EHIJK"),
@@ -319,7 +312,6 @@ public class MachesValidate
             var homeGroup = homeCode[0];
             var homeTeam = groupStandings.TryGetValue(homeGroup, out var hs) ? hs.FirstOrDefault()?.Name ?? "?" : "?";
             var thirdTeam = assignedThirds.TryGetValue(matchId, out var tt) ? $"{tt.Name} (3º Grupo {tt.Group})" : "NÃO ATRIBUÍDO";
-            Console.WriteLine($"  Jogo {matchId}: {homeTeam} (1º{homeGroup}) vs {thirdTeam}  [permitidos: {allowed}]");
         }
 
         var knockoutMatches = allMatches.Where(m => m.Id >= 73).OrderBy(m => m.Id).ToList();
@@ -452,8 +444,13 @@ public class MachesValidate
         return allTeams.GroupBy(t => t.Group).ToDictionary(g => g.Key, g => SortByFifaCriteria(g.ToList(), groupMatches.Where(m => g.Any(t => t.Id == m.HomeTeamId)).ToList()));
     }
 
-    private List<TeamModel> SortByFifaCriteria(List<TeamModel> teams, List<MatchModel> groupMatches)
+    public List<TeamModel> SortByFifaCriteria(List<TeamModel> teams, List<MatchModel> groupMatches)
     {
+        if (teams.All(t => t.Points == 0 && t.GamesPlayed == 0))
+        {
+            return teams.OrderByDescending(t => IsHostNation(t.Name)).ThenByDescending(t => GetFifaRanking(t.Name)).ToList();
+        }
+
         var sorted = new List<TeamModel>();
         var groupedByPoints = teams.GroupBy(t => t.Points).OrderByDescending(g => g.Key);
 
@@ -466,7 +463,6 @@ public class MachesValidate
             }
             else
             {
-                // Envia as equipes empatadas em pontos para resolver pelos passos 1, 2 e 3
                 sorted.AddRange(ResolveTiedTeams(tiedTeams, groupMatches));
             }
         }
@@ -483,41 +479,56 @@ public class MachesValidate
     {
         if (tiedTeams.Count <= 1) return tiedTeams;
         
-        var teamIds = new HashSet<int>(tiedTeams.Select(t => t.Id));
-        
-        // Jogos apenas entre os empatados (Passo 1: Confronto Direto)
-        var miniMatches = groupMatches.Where(m => m.HomeTeamId.HasValue && m.AwayTeamId.HasValue && 
-                                                  teamIds.Contains(m.HomeTeamId.Value) && 
-                                                  teamIds.Contains(m.AwayTeamId.Value)).ToList();
-                                                  
-        var stats = tiedTeams.ToDictionary(t => t.Id, t => new H2HStats());
-        
-        foreach (var m in miniMatches)
+        var tiedTeamIds = tiedTeams.Select(t => t.Id).ToHashSet();
+        var h2hMatches = groupMatches.Where(m => 
+            m.HomeTeamId.HasValue && m.AwayTeamId.HasValue &&
+            tiedTeamIds.Contains(m.HomeTeamId.Value) && 
+            tiedTeamIds.Contains(m.AwayTeamId.Value) &&
+            m.Status == MatchStatus.Finished).ToList();
+
+        var h2hStats = tiedTeams.ToDictionary(t => t.Id, t => new H2HStats());
+
+        foreach(var m in h2hMatches)
         {
-            var hId = m.HomeTeamId!.Value; var aId = m.AwayTeamId!.Value;
-            stats[hId].GoalsFor += m.HomeTeamScore ?? 0; stats[hId].GoalsAgainst += m.AwayTeamScore ?? 0;
-            stats[aId].GoalsFor += m.AwayTeamScore ?? 0; stats[aId].GoalsAgainst += m.HomeTeamScore ?? 0;
-            if (m.HomeTeamScore > m.AwayTeamScore) stats[hId].Points += 3;
-            else if (m.HomeTeamScore < m.AwayTeamScore) stats[aId].Points += 3;
-            else { stats[hId].Points += 1; stats[aId].Points += 1; }
+            if (m.HomeTeamScore > m.AwayTeamScore) h2hStats[m.HomeTeamId.Value].Points += 3;
+            else if (m.HomeTeamScore < m.AwayTeamScore) h2hStats[m.AwayTeamId.Value].Points += 3;
+            else { h2hStats[m.HomeTeamId.Value].Points += 1; h2hStats[m.AwayTeamId.Value].Points += 1; }
+
+            h2hStats[m.HomeTeamId.Value].GoalsFor += m.HomeTeamScore.Value;
+            h2hStats[m.HomeTeamId.Value].GoalsAgainst += m.AwayTeamScore.Value;
+            
+            h2hStats[m.AwayTeamId.Value].GoalsFor += m.AwayTeamScore.Value;
+            h2hStats[m.AwayTeamId.Value].GoalsAgainst += m.HomeTeamScore.Value;
         }
-        
-        return tiedTeams
-            // PASSO 1: Geral no Grupo (Prioridade FIFA moderna)
-            .OrderByDescending(t => t.GoalDifference)             // melhor saldo de gols (todas as partidas)
-            .ThenByDescending(t => t.GoalsFor)                   // maior número de gols (todas as partidas)
-            .ThenByDescending(t => t.Wins)                       // maior número de vitórias (todas as partidas)
-            // PASSO 2: Confronto Direto (Se persistir o empate)
-            .ThenByDescending(t => stats[t.Id].Points)          // maior número de pontos (confronto direto)
-            .ThenByDescending(t => stats[t.Id].GoalDifference)   // saldo de gols (confronto direto)
-            .ThenByDescending(t => stats[t.Id].GoalsFor)         // gols marcados (confronto direto)
-            // PASSO 3: Fair Play
-            .ThenByDescending(t => (t.YellowCards * -1) + (t.RedCards * -3))
-            // PASSO 4: Prioridade para Países Sedes (México, EUA, Canadá) no início
-            .ThenByDescending(t => IsHostNation(t.Name) ? 1 : 0)
-            // PASSO 5: Ranking da FIFA
-            .ThenByDescending(t => GetFifaRanking(t.Name))       // ranking mais recente da FIFA (maior é melhor)
-            .ToList();
+
+        tiedTeams.Sort((a, b) =>
+        {
+            int ptsCmp = h2hStats[b.Id].Points.CompareTo(h2hStats[a.Id].Points);
+            if (ptsCmp != 0) return ptsCmp;
+
+            int gdCmp = h2hStats[b.Id].GoalDifference.CompareTo(h2hStats[a.Id].GoalDifference);
+            if (gdCmp != 0) return gdCmp;
+
+            int gfCmp = h2hStats[b.Id].GoalsFor.CompareTo(h2hStats[a.Id].GoalsFor);
+            if (gfCmp != 0) return gfCmp;
+
+            int allGdCmp = b.GoalDifference.CompareTo(a.GoalDifference);
+            if (allGdCmp != 0) return allGdCmp;
+
+            int allGfCmp = b.GoalsFor.CompareTo(a.GoalsFor);
+            if (allGfCmp != 0) return allGfCmp;
+
+            int aFairPlay = (a.YellowCards * -1) + (a.RedCards * -3);
+            int bFairPlay = (b.YellowCards * -1) + (b.RedCards * -3);
+            int fpCmp = bFairPlay.CompareTo(aFairPlay);
+            if (fpCmp != 0) return fpCmp;
+
+            double aRank = GetFifaRanking(a.Name);
+            double bRank = GetFifaRanking(b.Name);
+            return bRank.CompareTo(aRank);
+        });
+
+        return tiedTeams;
     }
 
     /// <summary>
